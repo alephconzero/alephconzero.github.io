@@ -137,6 +137,11 @@ header h1.logo {
   top: 0.28em;
 }
 
+.aleph-zero {
+  display: inline-block;
+  line-height: 1;
+}
+
 header h2 {
   text-align: center;
   font-size: 1.8em;
