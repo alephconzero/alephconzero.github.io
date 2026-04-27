@@ -906,3 +906,46 @@ blockquote footer {
     max-width: 100%;
   }
 }
+
+.formula {
+  margin:  auto;
+  padding: 16px;
+  overflow-x: auto;
+  border: 1px solid var(--border-soft);
+  border-radius: 10px;
+  background: var(--bg-paper);
+  text-align: center;
+}
+
+
+.battuta figure {
+  margin: 12px 0 0;
+}
+
+.battuta figcaption {
+  margin-top: 8px;
+  font-size: 0.85em;
+  line-height: 1.4;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+
+.immagine-centrata {
+  margin: 30px auto;
+  text-align: center;
+  max-width: 700px;
+}
+
+.immagine-centrata img {
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  box-shadow: var(--shadow-soft);
+}
+
+.immagine-centrata figcaption {
+  margin-top: 10px;
+  font-size: 0.9em;
+  color: var(--text-muted);
+}
