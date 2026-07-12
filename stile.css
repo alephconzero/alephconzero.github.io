@@ -1394,6 +1394,22 @@ blockquote footer {
   gap: 6px;
 }
 
+.dati-simulazione strong {
+  display: inline-block;
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+#simulation-time {
+  min-width: 5.8ch;
+}
+
+#divergence {
+  min-width: 7.2ch;
+}
+
 .legenda-colore {
   display: inline-block;
   width: 11px;
