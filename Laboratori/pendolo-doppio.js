@@ -43,6 +43,8 @@
   const MASS_2 = 1;
   const INTEGRATION_STEP = 1 / 240;
   const MAX_TRAIL_POINTS = 1100;
+  const READOUT_INTERVAL_MS = 120;
+  const DIVERGENCE_SMOOTHING = 0.24;
 
   let stateA;
   let stateB;
@@ -55,6 +57,8 @@
   let animationFrameId = null;
   let canvasWidth = 0;
   let canvasHeight = 0;
+  let lastReadoutTimestamp = 0;
+  let displayedDivergence = 0;
 
   const css = getComputedStyle(document.documentElement);
   const palette = {
@@ -191,12 +195,35 @@
     }
   }
 
-  function updateReadouts() {
-    timeOutput.textContent = `${formatNumber(simulationTime, 2)} s`;
-    const divergence = angularDivergenceDegrees();
-    const digits = divergence < 0.1 ? 3 : divergence < 10 ? 2 : 1;
-    divergenceOutput.textContent = `${formatNumber(divergence, digits)}°`;
+ function updateReadouts({ force = false, timestamp = performance.now() } = {}) {
+  if (!force && timestamp - lastReadoutTimestamp < READOUT_INTERVAL_MS) return;
+
+  lastReadoutTimestamp = timestamp;
+
+  const rawDivergence = angularDivergenceDegrees();
+
+  if (force || !running) {
+    displayedDivergence = rawDivergence;
+  } else {
+    displayedDivergence +=
+      (rawDivergence - displayedDivergence) * DIVERGENCE_SMOOTHING;
   }
+
+  const timeDigits = running ? 1 : 2;
+
+  timeOutput.textContent =
+    `${formatNumber(simulationTime, timeDigits)} s`;
+
+  const digits =
+    displayedDivergence < 0.1
+      ? 3
+      : displayedDivergence < 10
+        ? 2
+        : 1;
+
+  divergenceOutput.textContent =
+    `${formatNumber(displayedDivergence, digits)}°`;
+}
 
   function updateComparisonVisibility() {
     const enabled = controls.compare.checked;
@@ -212,10 +239,11 @@
     simulationTime = 0;
     accumulator = 0;
     lastTimestamp = null;
-    clearTrails();
-    appendTrailPoint();
-    updateReadouts();
-    updateComparisonVisibility();
+  clearTrails();
+appendTrailPoint();
+displayedDivergence = angularDivergenceDegrees();
+updateReadouts({ force: true });
+updateComparisonVisibility();
     draw();
 
     if (!keepRunning) pauseSimulation();
@@ -245,6 +273,7 @@
       animationFrameId = null;
     }
     setRunningUi(false);
+    updateReadouts({ force: true });
   }
 
   function toggleSimulation() {
@@ -272,7 +301,7 @@
     }
 
     appendTrailPoint();
-    updateReadouts();
+    updateReadouts(timestamp);
     draw();
     animationFrameId = requestAnimationFrame(animate);
   }
