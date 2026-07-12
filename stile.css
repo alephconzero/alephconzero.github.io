@@ -816,9 +816,12 @@ blockquote footer {
   }
 
   .menu {
-    width: 220px;
-    left: -240px;
-  }
+  width: 220px;
+  left: -240px;
+  gap: 16px;
+  padding-top: 92px;
+  padding-bottom: 24px;
+}
 
   .menu a {
     font-size: 1.15em;
