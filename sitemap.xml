@@ -1,31 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://www.alephconzero.com/</loc>
-     </url>
-     <url>
-    <loc>https://www.alephconzero.com/Chisono.html</loc>
-        </url>
-        <url>
-    <loc>https://www.alephconzero.com/Lasquadrasgorbi.html/</loc>
-           </url>
-           <url>
-    <loc>https://www.alephconzero.com/Articoli.html</loc>
-              </url>
-              <url>
-    <loc>https://www.alephconzero.com/Bibliografia.html</loc>
-                 </url>
-                 <url>
-    <loc>https://www.alephconzero.com/contatti.html</loc>
-  </url>
-   <url>
-    <loc>https://www.alephconzero.com/privacy.html</loc>
-  </url>
-  <url>
-    <loc>https://www.alephconzero.com/Articoli/Scienzaefedefannoacazzotti.html</loc>
-  </url>
-
-  <url>
-    <loc>https://www.alephconzero.com/Articoli/Dubbicontiecavalli.html</loc>
-  </url>
+  <url><loc>https://www.alephconzero.com/</loc></url>
+  <url><loc>https://www.alephconzero.com/Chisono.html</loc></url>
+  <url><loc>https://www.alephconzero.com/Lasquadrasgorbi.html</loc></url>
+  <url><loc>https://www.alephconzero.com/Articoli.html</loc></url>
+  <url><loc>https://www.alephconzero.com/Laboratorio.html</loc></url>
+  <url><loc>https://www.alephconzero.com/Laboratori/PendoloDoppio.html</loc></url>
+  <url><loc>https://www.alephconzero.com/Bibliografia.html</loc></url>
+  <url><loc>https://www.alephconzero.com/contatti.html</loc></url>
+  <url><loc>https://www.alephconzero.com/privacy.html</loc></url>
+  <url><loc>https://www.alephconzero.com/Articoli/Scienzaefedefannoacazzotti.html</loc></url>
+  <url><loc>https://www.alephconzero.com/Articoli/Dubbicontiecavalli.html</loc></url>
 </urlset>

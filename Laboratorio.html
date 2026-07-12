@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Laboratori interattivi di fisica e matematica di AlephconZero.">
+  <title>Laboratorio – AlephconZero</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="stile.css">
+</head>
+<body>
+  <header>
+    <h1 class="logo">
+      <span class="logo-aleph">ℵ</span><span class="logo-zero">0</span>
+    </h1>
+    <h2>Per mettere i pensieri in fila</h2>
+  </header>
+
+  <div class="menu-container">
+    <div class="hamburger" id="hamburger" role="button" tabindex="0" aria-label="Apri il menu" aria-controls="menu" aria-expanded="false">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+
+    <nav class="menu" id="menu" aria-label="Navigazione principale">
+      <a href="index.html">Home</a>
+      <a href="Chisono.html">Chi sono</a>
+      <a href="Lasquadrasgorbi.html">La Squadra Sgorbi</a>
+      <a href="Articoli.html">Articoli</a>
+      <a href="Laboratorio.html" aria-current="page">Laboratorio</a>
+      <a href="Bibliografia.html">Bibliografia</a>
+      <a href="contatti.html">Contatti</a>
+      <a href="privacy.html">Privacy Policy</a>
+    </nav>
+  </div>
+
+  <main>
+    <section class="articoli laboratorio-intro">
+      <h2>Laboratorio interattivo</h2>
+      <p>
+        Qui puoi modificare i parametri di alcuni sistemi fisici e matematici e osservarne direttamente il comportamento.
+        Il laboratorio crescerà nel tempo: si comincia con uno dei sistemi più semplici da descrivere e più imprevedibili da seguire.
+      </p>
+
+      <div class="articoli-grid laboratorio-grid">
+        <article class="card laboratorio-card">
+          <a href="Laboratori/PendoloDoppio.html" class="card-link">
+            <div class="thumb laboratorio-thumb">
+              <img src="immagini/pendolo-doppio.svg" alt="Illustrazione di due pendoli doppi con traiettorie divergenti">
+            </div>
+            <div class="card-content">
+              <h3>Pendolo doppio</h3>
+              <p>
+                Imposta lunghezze e angoli iniziali. Aggiungi un secondo sistema quasi identico e osserva come le traiettorie divergono.
+              </p>
+              <span class="card-azione">Apri il laboratorio →</span>
+            </div>
+          </a>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2026 ℵ₀ – AlephconZero</p>
+    <p><small><em>La teoria è quando si sa tutto e niente funziona. Qui proviamo almeno a muovere qualcosa.</em></small></p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -5,16 +5,33 @@ const hamburger = document.getElementById("hamburger");
 const menu = document.getElementById("menu");
 
 if (hamburger && menu) {
+  const setMenuState = (open) => {
+    hamburger.classList.toggle("active", open);
+    menu.classList.toggle("show", open);
+    hamburger.setAttribute("aria-expanded", String(open));
+    hamburger.setAttribute("aria-label", open ? "Chiudi il menu" : "Apri il menu");
+  };
+
+  hamburger.setAttribute("role", "button");
+  hamburger.setAttribute("tabindex", "0");
+  hamburger.setAttribute("aria-controls", "menu");
+  hamburger.setAttribute("aria-expanded", "false");
+  hamburger.setAttribute("aria-label", "Apri il menu");
+
   hamburger.addEventListener("click", () => {
-    hamburger.classList.toggle("active");
-    menu.classList.toggle("show");
+    setMenuState(!menu.classList.contains("show"));
+  });
+
+  hamburger.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    e.preventDefault();
+    setMenuState(!menu.classList.contains("show"));
   });
 
   // (extra non distruttivo) chiudi con ESC
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
-      hamburger.classList.remove("active");
-      menu.classList.remove("show");
+      setMenuState(false);
     }
   });
 
@@ -22,8 +39,7 @@ if (hamburger && menu) {
   document.addEventListener("click", (e) => {
     if (!menu.classList.contains("show")) return;
     if (menu.contains(e.target) || hamburger.contains(e.target)) return;
-    hamburger.classList.remove("active");
-    menu.classList.remove("show");
+    setMenuState(false);
   });
 }
 
