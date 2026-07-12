@@ -8,10 +8,7 @@
   if (!ctx) return;
 
   const controls = {
-    length1Range: document.getElementById("length1-range"),
-    length1Number: document.getElementById("length1-number"),
-    length2Range: document.getElementById("length2-range"),
-    length2Number: document.getElementById("length2-number"),
+    
     angle1Range: document.getElementById("angle1-range"),
     angle1Number: document.getElementById("angle1-number"),
     angle2Range: document.getElementById("angle2-range"),
@@ -41,6 +38,8 @@
   const GRAVITY = 9.81;
   const MASS_1 = 1;
   const MASS_2 = 1;
+  const LENGTH_1 = 1;
+  const LENGTH_2 = 1;
   const INTEGRATION_STEP = 1 / 240;
   const MAX_TRAIL_POINTS = 1100;
   const READOUT_INTERVAL_MS = 120;
@@ -86,17 +85,17 @@
     return Number.isFinite(value) ? value : fallback;
   }
 
-  function getParameters() {
-    return {
-      length1: numberValue(controls.length1Number, 1),
-      length2: numberValue(controls.length2Number, 1),
-      angle1: numberValue(controls.angle1Number, 120) * DEG_TO_RAD,
-      angle2: numberValue(controls.angle2Number, -10) * DEG_TO_RAD,
-      perturbation: numberValue(controls.perturbationNumber, 0.05) * DEG_TO_RAD,
-      compare: controls.compare.checked,
-      speed: numberValue(controls.speed, 1)
-    };
-  }
+   function getParameters() {
+  return {
+    length1: LENGTH_1,
+    length2: LENGTH_2,
+    angle1: numberValue(controls.angle1Number, 120) * DEG_TO_RAD,
+    angle2: numberValue(controls.angle2Number, -10) * DEG_TO_RAD,
+    perturbation: numberValue(controls.perturbationNumber, 0.05) * DEG_TO_RAD,
+    compare: controls.compare.checked,
+    speed: numberValue(controls.speed, 1)
+  };
+}
 
   function createInitialState(theta1, theta2) {
     return {
@@ -467,25 +466,33 @@ updateComparisonVisibility();
   }
 
   const presets = {
-    classico: { length1: 1, length2: 1, angle1: 120, angle2: -10, perturbation: 0.05 },
-    caotico: { length1: 1, length2: 0.85, angle1: 135, angle2: 80, perturbation: 0.01 },
-    simmetrico: { length1: 1, length2: 1, angle1: 90, angle2: 90, perturbation: 0.1 }
-  };
+  classico: {
+    angle1: 120,
+    angle2: -10,
+    perturbation: 0.05
+  },
+  caotico: {
+    angle1: 135,
+    angle2: 80,
+    perturbation: 0.01
+  },
+  simmetrico: {
+    angle1: 90,
+    angle2: 90,
+    perturbation: 0.1
+  }
+};
 
   function applyPreset(name) {
     const preset = presets[name];
     if (!preset) return;
-    setPair(controls.length1Range, controls.length1Number, preset.length1, 2);
-    setPair(controls.length2Range, controls.length2Number, preset.length2, 2);
+  
     setPair(controls.angle1Range, controls.angle1Number, preset.angle1, 0);
     setPair(controls.angle2Range, controls.angle2Number, preset.angle2, 0);
     setPair(controls.perturbationRange, controls.perturbationNumber, preset.perturbation, 3);
     controls.compare.checked = true;
     resetSimulation();
   }
-
-  syncRangeAndNumber(controls.length1Range, controls.length1Number, 2);
-  syncRangeAndNumber(controls.length2Range, controls.length2Number, 2);
   syncRangeAndNumber(controls.angle1Range, controls.angle1Number, 0);
   syncRangeAndNumber(controls.angle2Range, controls.angle2Number, 0);
   syncRangeAndNumber(controls.perturbationRange, controls.perturbationNumber, 3);
