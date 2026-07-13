@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Simulatore interattivo del pendolo doppio: modifica gli angoli iniziali e confronta due traiettorie quasi identiche.">
+  <title>Pendolo doppio – Laboratorio AlephconZero</title>
+  <link rel="icon" href="../favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="../stile.css">
+</head>
+<body>
+  <div class="progress-bar"></div>
+
+  <header>
+    <h1 class="logo">
+      <span class="logo-aleph">ℵ</span><span class="logo-zero">0</span>
+    </h1>
+    <h2>Per mettere i pensieri in fila</h2>
+  </header>
+
+  <div class="menu-container">
+    <div class="hamburger" id="hamburger" role="button" tabindex="0" aria-label="Apri il menu" aria-controls="menu" aria-expanded="false">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+
+    <nav class="menu" id="menu" aria-label="Navigazione principale">
+      <a href="../index.html">Home</a>
+      <a href="../Chisono.html">Chi sono</a>
+      <a href="../Lasquadrasgorbi.html">La Squadra Sgorbi</a>
+      <a href="../Articoli.html">Articoli</a>
+      <a href="../Laboratorio.html" aria-current="page">Laboratorio</a>
+      <a href="../Bibliografia.html">Bibliografia</a>
+      <a href="../contatti.html">Contatti</a>
+      <a href="../privacy.html">Privacy Policy</a>
+    </nav>
+  </div>
+
+  <main>
+    <article class="laboratorio-pagina">
+      <div class="laboratorio-testata">
+        <p class="laboratorio-breadcrumb"><a href="../Laboratorio.html">Laboratorio</a> / Pendolo doppio</p>
+        <h2>Pendolo doppio</h2>
+        <p>
+          Un pendolo doppio obbedisce a equazioni deterministiche, ma può essere estremamente sensibile alle condizioni iniziali.
+          Scegli gli angoli iniziali, avvia la simulazione e confronta due sistemi separati da una differenza minuscola.
+        </p>
+      </div>
+
+      <section class="simulatore" aria-labelledby="titolo-simulatore">
+        <h3 id="titolo-simulatore" class="sr-only">Simulatore interattivo</h3>
+
+        <div class="simulatore-layout">
+          <aside class="pannello-controlli" aria-label="Parametri della simulazione">
+            <div class="controlli-intestazione">
+              <h3>Parametri iniziali</h3>
+              <p>Usa i cursori per una regolazione rapida oppure inserisci il valore esatto.</p>
+            </div>
+
+            <div class="preset-row" aria-label="Configurazioni predefinite">
+              <button type="button" class="button button-secondario preset-button" data-preset="classico">Classico</button>
+              <button type="button" class="button button-secondario preset-button" data-preset="caotico">Caotico</button>
+              <button type="button" class="button button-secondario preset-button" data-preset="simmetrico">Simmetrico</button>
+            </div>
+
+            <div class="controlli-grid">
+              <fieldset class="gruppo-controlli">
+              <legend>Angoli iniziali</legend>
+
+              <div class="parametro" data-control="angle1">
+                <div class="parametro-label">
+                  <label for="angle1-range">Angolo del primo braccio</label>
+                  <div class="input-con-unita">
+                    <input id="angle1-number" class="parametro-number" type="number" min="-180" max="180" step="1" value="120" inputmode="decimal">
+                    <span>°</span>
+                  </div>
+                </div>
+                <input id="angle1-range" class="parametro-range" type="range" min="-180" max="180" step="1" value="120">
+              </div>
+
+              <div class="parametro" data-control="angle2">
+                <div class="parametro-label">
+                  <label for="angle2-range">Angolo del secondo braccio</label>
+                  <div class="input-con-unita">
+                    <input id="angle2-number" class="parametro-number" type="number" min="-180" max="180" step="1" value="-10" inputmode="decimal">
+                    <span>°</span>
+                  </div>
+                </div>
+                <input id="angle2-range" class="parametro-range" type="range" min="-180" max="180" step="1" value="-10">
+              </div>
+            </fieldset>
+
+            <fieldset class="gruppo-controlli confronto-controlli">
+              <legend>Confronto</legend>
+
+              <label class="switch-row" for="compare-toggle">
+                <span>
+                  <strong>Mostra due pendoli</strong>
+                  <small>Il secondo parte con un angolo leggermente diverso.</small>
+                </span>
+                <span class="switch">
+                  <input id="compare-toggle" type="checkbox" checked>
+                  <span class="switch-slider" aria-hidden="true"></span>
+                </span>
+              </label>
+
+              <div id="perturbation-control" class="parametro" data-control="perturbation">
+                <div class="parametro-label">
+                  <label for="perturbation-range">Scostamento del secondo sistema</label>
+                  <div class="input-con-unita">
+                    <input id="perturbation-number" class="parametro-number" type="number" min="0.001" max="5" step="0.001" value="0.050" inputmode="decimal">
+                    <span>°</span>
+                  </div>
+                </div>
+                <input id="perturbation-range" class="parametro-range" type="range" min="0.001" max="5" step="0.001" value="0.050">
+              </div>
+            </fieldset>
+
+            <fieldset class="gruppo-controlli gruppo-visualizzazione">
+              <legend>Visualizzazione</legend>
+
+              <div class="parametro" data-control="speed">
+                <div class="parametro-label">
+                  <label for="speed-range">Velocità</label>
+                  <output id="speed-output" for="speed-range">1,0×</output>
+                </div>
+                <input id="speed-range" class="parametro-range" type="range" min="0.25" max="2" step="0.25" value="1">
+              </div>
+
+              <label class="check-row" for="trails-toggle">
+                <input id="trails-toggle" type="checkbox" checked>
+                <span>Mostra le traiettorie</span>
+              </label>
+            </fieldset>
+            </div>
+
+            <div class="azioni-simulazione">
+              <button id="start-pause" type="button" class="button button-principale">Avvia</button>
+              <button id="reset" type="button" class="button button-secondario">Ripristina</button>
+              <button id="clear-trails" type="button" class="button button-secondario">Cancella tracce</button>
+            </div>
+
+            <p class="nota-controlli">Le modifiche agli angoli e allo scostamento riavviano il sistema dalle nuove condizioni iniziali.</p>
+          </aside>
+
+          <div class="area-simulazione">
+            <div class="canvas-toolbar" aria-live="polite">
+              <div class="legenda-simulazione">
+                <span><i class="legenda-colore pendolo-a"></i>Pendolo A</span>
+                <span id="legend-b"><i class="legenda-colore pendolo-b"></i>Pendolo B</span>
+              </div>
+              <div class="dati-simulazione">
+                <span>Tempo: <strong id="simulation-time">0,00 s</strong></span>
+                <span id="divergence-wrap">Divergenza: <strong id="divergence">0,050°</strong></span>
+              </div>
+            </div>
+
+            <div class="canvas-frame">
+              <canvas id="pendulum-canvas" aria-label="Animazione di uno o due pendoli doppi" role="img">
+                Il tuo browser non supporta l'elemento canvas necessario per questa simulazione.
+              </canvas>
+              <div id="canvas-message" class="canvas-message">Premi “Avvia” per iniziare</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="laboratorio-spiegazione">
+        <h3>Che cosa osservare</h3>
+        <p>
+          Con due pendoli attivi, tutti i bracci misurano un metro e i sistemi partono con velocità nulla. L’unica differenza è il piccolo
+          scostamento applicato all’angolo del secondo braccio del pendolo B. All’inizio le traiettorie possono sembrare sovrapposte;
+          col passare del tempo la distanza tra gli stati cresce e il comportamento diventa visibilmente diverso.
+        </p>
+        <p>
+          Questo non significa che il moto sia casuale: a parità di condizioni iniziali, le equazioni producono sempre lo stesso
+          risultato. È invece un esempio di <strong>sensibilità alle condizioni iniziali</strong>, una caratteristica tipica dei sistemi caotici.
+        </p>
+        <div class="nota-fisica">
+          <strong>Modello usato:</strong> aste prive di massa, masse puntiformi uguali, gravità terrestre costante e assenza di attrito.
+          L’integrazione numerica è effettuata con il metodo di Runge–Kutta del quarto ordine.
+        </div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>© 2026 ℵ₀ – AlephconZero</p>
+    <p><small><em>Due sistemi quasi uguali. Almeno all’inizio.</em></small></p>
+  </footer>
+
+  <script src="../script.js"></script>
+  <script src="pendolo-doppio.js"></script>
+</body>
+</html>
