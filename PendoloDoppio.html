@@ -6,7 +6,7 @@
   <meta name="description" content="Simulatore interattivo del pendolo doppio: modifica gli angoli iniziali e confronta due traiettorie quasi identiche.">
   <title>Pendolo doppio – Laboratorio AlephconZero</title>
   <link rel="icon" href="../favicon.ico" type="image/x-icon">
-  <link rel="stylesheet" href="../stile.css">
+  <link rel="stylesheet" href="../stile.css?v=7">
 </head>
 <body>
   <div class="progress-bar"></div>
@@ -44,7 +44,7 @@
         <h2>Pendolo doppio</h2>
         <p>
           Un pendolo doppio obbedisce a equazioni deterministiche, ma può essere estremamente sensibile alle condizioni iniziali.
-          Scegli gli angoli iniziali, avvia la simulazione e confronta due sistemi separati da una differenza minuscola.
+          Scegli gli angoli iniziali, avvia la simulazione e confronta due sistemi separati da una differenza iniziale minuscola.
         </p>
       </div>
 
@@ -66,73 +66,73 @@
 
             <div class="controlli-grid">
               <fieldset class="gruppo-controlli">
-              <legend>Angoli iniziali</legend>
+                <legend>Angoli iniziali</legend>
 
-              <div class="parametro" data-control="angle1">
-                <div class="parametro-label">
-                  <label for="angle1-range">Angolo del primo braccio</label>
-                  <div class="input-con-unita">
-                    <input id="angle1-number" class="parametro-number" type="number" min="-180" max="180" step="1" value="120" inputmode="decimal">
-                    <span>°</span>
+                <div class="parametro" data-control="angle1">
+                  <div class="parametro-label">
+                    <label for="angle1-range">Angolo del primo braccio</label>
+                    <div class="input-con-unita">
+                      <input id="angle1-number" class="parametro-number" type="number" min="-180" max="180" step="1" value="120" inputmode="decimal">
+                      <span>°</span>
+                    </div>
                   </div>
+                  <input id="angle1-range" class="parametro-range" type="range" min="-180" max="180" step="1" value="120">
                 </div>
-                <input id="angle1-range" class="parametro-range" type="range" min="-180" max="180" step="1" value="120">
-              </div>
 
-              <div class="parametro" data-control="angle2">
-                <div class="parametro-label">
-                  <label for="angle2-range">Angolo del secondo braccio</label>
-                  <div class="input-con-unita">
-                    <input id="angle2-number" class="parametro-number" type="number" min="-180" max="180" step="1" value="-10" inputmode="decimal">
-                    <span>°</span>
+                <div class="parametro" data-control="angle2">
+                  <div class="parametro-label">
+                    <label for="angle2-range">Angolo del secondo braccio</label>
+                    <div class="input-con-unita">
+                      <input id="angle2-number" class="parametro-number" type="number" min="-180" max="180" step="1" value="-10" inputmode="decimal">
+                      <span>°</span>
+                    </div>
                   </div>
+                  <input id="angle2-range" class="parametro-range" type="range" min="-180" max="180" step="1" value="-10">
                 </div>
-                <input id="angle2-range" class="parametro-range" type="range" min="-180" max="180" step="1" value="-10">
-              </div>
-            </fieldset>
+              </fieldset>
 
-            <fieldset class="gruppo-controlli confronto-controlli">
-              <legend>Confronto</legend>
+              <fieldset class="gruppo-controlli confronto-controlli">
+                <legend>Confronto</legend>
 
-              <label class="switch-row" for="compare-toggle">
-                <span>
-                  <strong>Mostra due pendoli</strong>
-                  <small>Il secondo parte con un angolo leggermente diverso.</small>
-                </span>
-                <span class="switch">
-                  <input id="compare-toggle" type="checkbox" checked>
-                  <span class="switch-slider" aria-hidden="true"></span>
-                </span>
-              </label>
+                <label class="switch-row" for="compare-toggle">
+                  <span>
+                    <strong>Mostra due pendoli</strong>
+                    <small>Il secondo parte con un angolo leggermente diverso.</small>
+                  </span>
+                  <span class="switch">
+                    <input id="compare-toggle" type="checkbox" checked>
+                    <span class="switch-slider" aria-hidden="true"></span>
+                  </span>
+                </label>
 
-              <div id="perturbation-control" class="parametro" data-control="perturbation">
-                <div class="parametro-label">
-                  <label for="perturbation-range">Scostamento del secondo sistema</label>
-                  <div class="input-con-unita">
-                    <input id="perturbation-number" class="parametro-number" type="number" min="0.001" max="5" step="0.001" value="0.050" inputmode="decimal">
-                    <span>°</span>
+                <div id="perturbation-control" class="parametro" data-control="perturbation">
+                  <div class="parametro-label">
+                    <label for="perturbation-range">Scostamento del secondo sistema</label>
+                    <div class="input-con-unita">
+                      <input id="perturbation-number" class="parametro-number" type="number" min="0.001" max="5" step="0.001" value="0.050" inputmode="decimal">
+                      <span>°</span>
+                    </div>
                   </div>
+                  <input id="perturbation-range" class="parametro-range" type="range" min="0.001" max="5" step="0.001" value="0.050">
                 </div>
-                <input id="perturbation-range" class="parametro-range" type="range" min="0.001" max="5" step="0.001" value="0.050">
-              </div>
-            </fieldset>
+              </fieldset>
 
-            <fieldset class="gruppo-controlli gruppo-visualizzazione">
-              <legend>Visualizzazione</legend>
+              <fieldset class="gruppo-controlli gruppo-visualizzazione">
+                <legend>Visualizzazione</legend>
 
-              <div class="parametro" data-control="speed">
-                <div class="parametro-label">
-                  <label for="speed-range">Velocità</label>
-                  <output id="speed-output" for="speed-range">1,0×</output>
+                <div class="parametro" data-control="speed">
+                  <div class="parametro-label">
+                    <label for="speed-range">Velocità</label>
+                    <output id="speed-output" for="speed-range">1,0×</output>
+                  </div>
+                  <input id="speed-range" class="parametro-range" type="range" min="0.25" max="2" step="0.25" value="1">
                 </div>
-                <input id="speed-range" class="parametro-range" type="range" min="0.25" max="2" step="0.25" value="1">
-              </div>
 
-              <label class="check-row" for="trails-toggle">
-                <input id="trails-toggle" type="checkbox" checked>
-                <span>Mostra le traiettorie</span>
-              </label>
-            </fieldset>
+                <label class="check-row" for="trails-toggle">
+                  <input id="trails-toggle" type="checkbox" checked>
+                  <span>Mostra le traiettorie</span>
+                </label>
+              </fieldset>
             </div>
 
             <div class="azioni-simulazione">
