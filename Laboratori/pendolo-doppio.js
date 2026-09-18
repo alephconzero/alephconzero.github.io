@@ -8,7 +8,6 @@
   if (!ctx) return;
 
   const controls = {
-    
     angle1Range: document.getElementById("angle1-range"),
     angle1Number: document.getElementById("angle1-number"),
     angle2Range: document.getElementById("angle2-range"),
@@ -29,9 +28,9 @@
   const divergenceOutput = document.getElementById("divergence");
   const divergenceWrap = document.getElementById("divergence-wrap");
   const legendB = document.getElementById("legend-b");
-  const canvasMessage = document.getElementById("canvas-message");
   const presetButtons = document.querySelectorAll(".preset-button");
   const frameElement = canvas.closest(".canvas-frame");
+  const controlsPanel = document.getElementById("controls-panel");
 
   const DEG_TO_RAD = Math.PI / 180;
   const RAD_TO_DEG = 180 / Math.PI;
@@ -44,6 +43,10 @@
   const MAX_TRAIL_POINTS = 1100;
   const READOUT_INTERVAL_MS = 120;
   const DIVERGENCE_SMOOTHING = 0.24;
+
+  // Spazio libero (in pixel) tra la massa più lontana e il bordo del riquadro:
+  // deve superare il raggio massimo della seconda massa (19 px) più lo spessore dei tratti.
+  const EDGE_MARGIN = 28;
 
   let stateA;
   let stateB;
@@ -85,17 +88,17 @@
     return Number.isFinite(value) ? value : fallback;
   }
 
-   function getParameters() {
-  return {
-    length1: LENGTH_1,
-    length2: LENGTH_2,
-    angle1: numberValue(controls.angle1Number, 120) * DEG_TO_RAD,
-    angle2: numberValue(controls.angle2Number, -10) * DEG_TO_RAD,
-    perturbation: numberValue(controls.perturbationNumber, 0.05) * DEG_TO_RAD,
-    compare: controls.compare.checked,
-    speed: numberValue(controls.speed, 1)
-  };
-}
+  function getParameters() {
+    return {
+      length1: LENGTH_1,
+      length2: LENGTH_2,
+      angle1: numberValue(controls.angle1Number, 120) * DEG_TO_RAD,
+      angle2: numberValue(controls.angle2Number, -10) * DEG_TO_RAD,
+      perturbation: numberValue(controls.perturbationNumber, 0.05) * DEG_TO_RAD,
+      compare: controls.compare.checked,
+      speed: numberValue(controls.speed, 1)
+    };
+  }
 
   function createInitialState(theta1, theta2) {
     return {
@@ -194,35 +197,35 @@
     }
   }
 
- function updateReadouts({ force = false, timestamp = performance.now() } = {}) {
-  if (!force && timestamp - lastReadoutTimestamp < READOUT_INTERVAL_MS) return;
+  function updateReadouts({ force = false, timestamp = performance.now() } = {}) {
+    if (!force && timestamp - lastReadoutTimestamp < READOUT_INTERVAL_MS) return;
 
-  lastReadoutTimestamp = timestamp;
+    lastReadoutTimestamp = timestamp;
 
-  const rawDivergence = angularDivergenceDegrees();
+    const rawDivergence = angularDivergenceDegrees();
 
-  if (force || !running) {
-    displayedDivergence = rawDivergence;
-  } else {
-    displayedDivergence +=
-      (rawDivergence - displayedDivergence) * DIVERGENCE_SMOOTHING;
+    if (force || !running) {
+      displayedDivergence = rawDivergence;
+    } else {
+      displayedDivergence +=
+        (rawDivergence - displayedDivergence) * DIVERGENCE_SMOOTHING;
+    }
+
+    const timeDigits = running ? 1 : 2;
+
+    timeOutput.textContent =
+      `${formatNumber(simulationTime, timeDigits)} s`;
+
+    const digits =
+      displayedDivergence < 0.1
+        ? 3
+        : displayedDivergence < 10
+          ? 2
+          : 1;
+
+    divergenceOutput.textContent =
+      `${formatNumber(displayedDivergence, digits)}°`;
   }
-
-  const timeDigits = running ? 1 : 2;
-
-  timeOutput.textContent =
-    `${formatNumber(simulationTime, timeDigits)} s`;
-
-  const digits =
-    displayedDivergence < 0.1
-      ? 3
-      : displayedDivergence < 10
-        ? 2
-        : 1;
-
-  divergenceOutput.textContent =
-    `${formatNumber(displayedDivergence, digits)}°`;
-}
 
   function updateComparisonVisibility() {
     const enabled = controls.compare.checked;
@@ -231,29 +234,26 @@
     divergenceWrap.hidden = !enabled;
   }
 
-  function resetSimulation({ keepRunning = false, showMessage = true } = {}) {
+  function resetSimulation({ keepRunning = false } = {}) {
     const params = getParameters();
     stateA = createInitialState(params.angle1, params.angle2);
     stateB = createInitialState(params.angle1, params.angle2 + params.perturbation);
     simulationTime = 0;
     accumulator = 0;
     lastTimestamp = null;
-  clearTrails();
-appendTrailPoint();
-displayedDivergence = angularDivergenceDegrees();
-updateReadouts({ force: true });
-updateComparisonVisibility();
+    clearTrails();
+    appendTrailPoint();
+    displayedDivergence = angularDivergenceDegrees();
+    updateReadouts({ force: true });
+    updateComparisonVisibility();
     draw();
 
     if (!keepRunning) pauseSimulation();
-    canvasMessage.textContent = "Premi “Avvia” per iniziare";
-    canvasMessage.classList.toggle("is-hidden", !showMessage || running);
   }
 
   function setRunningUi(isRunning) {
     startPauseButton.textContent = isRunning ? "Pausa" : "Avvia";
     startPauseButton.setAttribute("aria-pressed", String(isRunning));
-    canvasMessage.classList.toggle("is-hidden", isRunning);
   }
 
   function startSimulation() {
@@ -300,7 +300,7 @@ updateComparisonVisibility();
     }
 
     appendTrailPoint();
-    updateReadouts(timestamp);
+    updateReadouts({ timestamp });
     draw();
     animationFrameId = requestAnimationFrame(animate);
   }
@@ -316,15 +316,18 @@ updateComparisonVisibility();
     draw();
   }
 
+  // Il perno sta al centro del riquadro: con le braccia tese il pendolo può
+  // puntare in qualsiasi direzione, quindi lo spazio da garantire è un cerchio
+  // di raggio (L1 + L2) attorno al perno. La scala si ricava dal lato minore
+  // del riquadro, così il pendolo non esce mai, qualunque sia la forma del canvas.
   function drawingGeometry() {
     const params = getParameters();
     const totalLength = params.length1 + params.length2;
-    const horizontalScale = canvasWidth * 0.42 / totalLength;
-    const verticalScale = canvasHeight * 0.70 / totalLength;
+    const availableRadius = Math.min(canvasWidth, canvasHeight) / 2 - EDGE_MARGIN;
     return {
       pivotX: canvasWidth / 2,
-      pivotY: Math.max(44, canvasHeight * 0.16),
-      scale: Math.min(horizontalScale, verticalScale),
+      pivotY: canvasHeight / 2,
+      scale: Math.max(1, availableRadius) / totalLength,
       params
     };
   }
@@ -440,7 +443,7 @@ updateComparisonVisibility();
     range.addEventListener("input", () => {
       const value = Number.parseFloat(range.value);
       number.value = value.toFixed(digits);
-      resetSimulation({ keepRunning: running, showMessage: !running });
+      resetSimulation({ keepRunning: running });
     });
 
     number.addEventListener("input", () => {
@@ -448,7 +451,7 @@ updateComparisonVisibility();
       if (!Number.isFinite(raw)) return;
       const value = clamp(raw, min, max);
       range.value = String(value);
-      resetSimulation({ keepRunning: running, showMessage: !running });
+      resetSimulation({ keepRunning: running });
     });
 
     number.addEventListener("change", () => {
@@ -456,7 +459,7 @@ updateComparisonVisibility();
       const value = clamp(Number.isFinite(raw) ? raw : Number.parseFloat(range.value), min, max);
       number.value = value.toFixed(digits);
       range.value = String(value);
-      resetSimulation({ keepRunning: running, showMessage: !running });
+      resetSimulation({ keepRunning: running });
     });
   }
 
@@ -466,39 +469,40 @@ updateComparisonVisibility();
   }
 
   const presets = {
-  classico: {
-    angle1: 120,
-    angle2: -10,
-    perturbation: 0.05
-  },
-  caotico: {
-    angle1: 135,
-    angle2: 80,
-    perturbation: 0.01
-  },
-  simmetrico: {
-    angle1: 90,
-    angle2: 90,
-    perturbation: 0.1
-  }
-};
+    classico: {
+      angle1: 120,
+      angle2: -10,
+      perturbation: 0.05
+    },
+    caotico: {
+      angle1: 135,
+      angle2: 80,
+      perturbation: 0.01
+    },
+    simmetrico: {
+      angle1: 90,
+      angle2: 90,
+      perturbation: 0.1
+    }
+  };
 
   function applyPreset(name) {
     const preset = presets[name];
     if (!preset) return;
-  
+
     setPair(controls.angle1Range, controls.angle1Number, preset.angle1, 0);
     setPair(controls.angle2Range, controls.angle2Number, preset.angle2, 0);
     setPair(controls.perturbationRange, controls.perturbationNumber, preset.perturbation, 3);
     controls.compare.checked = true;
     resetSimulation();
   }
+
   syncRangeAndNumber(controls.angle1Range, controls.angle1Number, 0);
   syncRangeAndNumber(controls.angle2Range, controls.angle2Number, 0);
   syncRangeAndNumber(controls.perturbationRange, controls.perturbationNumber, 3);
 
   controls.compare.addEventListener("change", () => {
-    resetSimulation({ keepRunning: running, showMessage: !running });
+    resetSimulation({ keepRunning: running });
   });
 
   controls.trails.addEventListener("change", () => {
@@ -507,7 +511,9 @@ updateComparisonVisibility();
   });
 
   controls.speed.addEventListener("input", () => {
-    controls.speedOutput.textContent = `${formatNumber(numberValue(controls.speed, 1), 2).replace(/,00$/, ",0")}×`;
+    // "1,00" -> "1,0"; "1,50" -> "1,5"; "0,25" resta "0,25"
+    const text = formatNumber(numberValue(controls.speed, 1), 2).replace(/0$/, "");
+    controls.speedOutput.textContent = `${text}×`;
   });
 
   startPauseButton.addEventListener("click", toggleSimulation);
@@ -525,10 +531,26 @@ updateComparisonVisibility();
   document.addEventListener("keydown", (event) => {
     if (event.code !== "Space") return;
     const target = event.target;
-    if (target instanceof HTMLInputElement || target instanceof HTMLButtonElement || target instanceof HTMLTextAreaElement) return;
+    if (
+      target instanceof HTMLInputElement ||
+      target instanceof HTMLButtonElement ||
+      target instanceof HTMLTextAreaElement ||
+      target instanceof HTMLElement && target.closest("summary")
+    ) return;
     event.preventDefault();
     toggleSimulation();
   });
+
+  // Pannello dei parametri: sempre aperto su desktop, chiuso di default su smartphone.
+  if (controlsPanel && "matchMedia" in window) {
+    const desktopQuery = window.matchMedia("(min-width: 901px)");
+    const syncPanel = () => {
+      controlsPanel.open = desktopQuery.matches;
+    };
+    syncPanel();
+    if (desktopQuery.addEventListener) desktopQuery.addEventListener("change", syncPanel);
+    else if (desktopQuery.addListener) desktopQuery.addListener(syncPanel);
+  }
 
   if ("ResizeObserver" in window && frameElement) {
     const resizeObserver = new ResizeObserver(resizeCanvas);
