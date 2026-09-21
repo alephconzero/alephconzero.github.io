@@ -35,6 +35,16 @@
 
   --shadow-soft: 0 6px 18px rgba(0, 0, 0, 0.08);
   --shadow-mid: 2px 2px 10px rgba(0, 0, 0, 0.08);
+
+    /* link nel testo */
+  --link: #2a6577;
+  --link-hover: #1d4a5c;
+  --link-underline: rgba(42, 101, 119, 0.38);
+  --link-bg-hover: rgba(42, 101, 119, 0.09);
+
+  /* termini con definizione */
+  --termine-bg: rgba(72, 96, 106, 0.08);
+  --termine-bg-hover: rgba(72, 96, 106, 0.17);
 }
 
 /* =========================
@@ -115,7 +125,8 @@ header h1 {
   color: var(--text-main);
 }
 
-header h1.logo {
+header h1.logo,
+header .logo{
   text-align: center;
   font-size: 8rem;
   letter-spacing: 0;
@@ -142,7 +153,8 @@ header h1.logo {
   line-height: 1;
 }
 
-header h2 {
+header h2,
+header .tagline{
   text-align: center;
   font-size: 1.8em;
   letter-spacing: 2px;
@@ -778,7 +790,8 @@ blockquote footer {
     padding-top: 20px;
   }
 
-  header h1.logo {
+  header h1.logo,
+  header .logo {
     font-size: 4.2rem;
   }
 
@@ -788,7 +801,8 @@ blockquote footer {
     top: 0.24em;
   }
 
-  header h2 {
+  header h2,
+  header .tagline  {
     font-size: 1.15em;
     letter-spacing: 1px;
     line-height: 1.4;
@@ -1594,3 +1608,254 @@ blockquote footer {
     transition: none;
   }
 }
+
+
+
+/* =========================================================
+   AGGIUNTE (settembre 2026)
+   1. Testata: sottotitolo come paragrafo
+   2. Titoli degli articoli (h1 = titolo, h2 = sezioni)
+   3. Link nel testo
+   4. Termini con definizione (glossario)
+========================================================= */
+ 
+/* ---------- 1. Testata ---------- */
+ 
+header .logo,
+header .tagline {
+  font-weight: 700; /* prima erano h1/h2, grassetto di default */
+}
+ 
+header .tagline {
+  margin-top: 36px;
+  margin-bottom: 18px;
+}
+ 
+/* ---------- 2. Titoli degli articoli ---------- */
+/* Stesso aspetto di prima: il titolo era un h2, le sezioni erano h3. */
+ 
+.articolo > h1 {
+  margin: 0 0 18px;
+  font-size: 1.5em;
+  color: var(--accent-dark);
+}
+ 
+.articolo h2 {
+  margin-top: 26px;
+  margin-bottom: 14px;
+  font-size: 1.17em;
+}
+ 
+/* ---------- 3. Link nel testo ---------- */
+/* Solo i link senza classe dentro main/footer (e nelle tendine):
+   card, pulsanti e menu non vengono toccati. */
+ 
+main a:not([class]),
+footer a:not([class]),
+.tendina a {
+  color: var(--link);
+  text-decoration-line: underline;
+  text-decoration-color: var(--link-underline);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+  border-radius: 3px;
+  transition: color 0.2s ease, text-decoration-color 0.2s ease, background-color 0.2s ease;
+}
+ 
+main a:not([class]):hover,
+footer a:not([class]):hover,
+.tendina a:hover {
+  color: var(--link-hover);
+  text-decoration-color: currentColor;
+  text-decoration-thickness: 2px;
+  background-color: var(--link-bg-hover);
+}
+ 
+/* Variante calda (terracotta, gia' presente nel laboratorio):
+   per provarla sostituisci le quattro variabili --link* in :root con
+     --link: #8a5433;  --link-hover: #6b3f24;
+     --link-underline: rgba(138, 84, 51, 0.4);  --link-bg-hover: rgba(166, 107, 67, 0.12); */
+ 
+/* ---------- 4. Termini con definizione ---------- */
+/* Lo stile si applica solo ai termini "attivati" dallo script
+   (cioe' quelli di cui esiste una definizione). */
+ 
+.termine[role="button"] {
+  padding: 0 0.1em;
+  border-radius: 3px;
+  background-color: var(--termine-bg);
+  text-decoration-line: underline;
+  text-decoration-style: dotted;
+  text-decoration-color: var(--accent-soft);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.24em;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+ 
+.termine[role="button"]::after {
+  content: "";
+  display: inline-block;
+  width: 0.34em;
+  height: 0.34em;
+  margin-left: 0.32em;
+  border-right: 2px solid var(--accent);
+  border-bottom: 2px solid var(--accent);
+  transform: translateY(-0.2em) rotate(45deg);
+  transition: transform 0.2s ease;
+}
+ 
+.termine[role="button"]:hover,
+.termine[role="button"][aria-expanded="true"] {
+  background-color: var(--termine-bg-hover);
+  color: var(--accent-dark);
+  text-decoration-color: var(--accent);
+}
+ 
+.termine[role="button"][aria-expanded="true"]::after {
+  transform: translateY(-0.02em) rotate(-135deg);
+}
+ 
+.termine[role="button"]:focus-visible {
+  outline: 2px solid var(--accent-dark);
+  outline-offset: 2px;
+}
+ 
+.tendina {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1200;
+  box-sizing: border-box;
+  width: min(340px, calc(100vw - 24px));
+  padding: 14px 16px 14px 16px;
+  border: 1px solid var(--border-mid);
+  border-left: 4px solid var(--accent);
+  border-radius: 8px;
+  background: var(--bg-paper);
+  box-shadow: 0 10px 30px rgba(53, 73, 82, 0.18);
+  color: var(--text-main);
+  font-size: 0.85em;
+  font-style: normal;
+  line-height: 1.6;
+  text-align: left;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(-4px);
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0s linear 0.18s;
+}
+ 
+.tendina[data-pos="sopra"] {
+  transform: translateY(4px);
+}
+ 
+.tendina.aperta {
+  visibility: visible;
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0s;
+}
+ 
+.tendina::before {
+  content: "";
+  position: absolute;
+  top: -7px;
+  left: var(--freccia-x, 24px);
+  width: 12px;
+  height: 12px;
+  margin-left: -6px;
+  border-top: 1px solid var(--border-mid);
+  border-left: 1px solid var(--border-mid);
+  background: var(--bg-paper);
+  transform: rotate(45deg);
+}
+ 
+.tendina[data-pos="sopra"]::before {
+  top: auto;
+  bottom: -7px;
+  border: 0;
+  border-right: 1px solid var(--border-mid);
+  border-bottom: 1px solid var(--border-mid);
+}
+ 
+.tendina-titolo {
+  display: block;
+  margin-right: 28px; /* spazio per il pulsante di chiusura */
+  margin-bottom: 4px;
+  font-weight: 700;
+  color: var(--accent-dark);
+}
+ 
+.tendina-titolo::first-letter {
+  text-transform: uppercase;
+}
+ 
+.tendina-testo {
+  margin: 0;
+}
+ 
+.tendina-chiudi {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 1.5em;
+  line-height: 1;
+  cursor: pointer;
+}
+ 
+.tendina-chiudi:hover {
+  background: var(--bg-paper-soft);
+  color: var(--accent-dark);
+}
+ 
+.tendina-chiudi:focus-visible {
+  outline: 2px solid var(--accent-dark);
+  outline-offset: 2px;
+}
+ 
+@media (max-width: 700px) {
+  header .tagline {
+    margin-top: 28px;
+    margin-bottom: 16px;
+  }
+ 
+  .articolo > h1 {
+    margin-bottom: 16px;
+  }
+ 
+  .articolo h2 {
+    margin-top: 22px;
+    margin-bottom: 12px;
+  }
+}
+ 
+@media (prefers-reduced-motion: reduce) {
+  .termine[role="button"],
+  .termine[role="button"]::after,
+  .tendina,
+  .tendina.aperta,
+  main a:not([class]),
+  footer a:not([class]) {
+    transition: none;
+  }
+}
+ 
+@media print {
+  .tendina {
+    display: none;
+  }
+}
+ 
