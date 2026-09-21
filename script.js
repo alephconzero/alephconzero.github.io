@@ -77,6 +77,7 @@ const citazioni = [
   { testo: "I cieli narrano la gloria di Dio, l'opera delle sue mani annuncia il firmamento.", autore: "Sal 19 (18)" },
   { testo: "Trovo in me stesso un desiderio che nessuna esperienza al mondo può soddisfare: la spiegazione più probabile è che sono stato fatto per un altro mondo.", autore: "C.S. Lewis" },
   { testo: "Non abbiamo quaggiù una città stabile, ma andiamo in cerca di quella futura.", autore: "Ebrei 13,14" },
+  { testo: "Caro signore, benché a lungo alienato, l'uommo non è perduto né del tutto cambiato.", autore: "J.R.R. Tolkien" },
   { testo: "Nessuno di voi sia trovato disertore. Il vostro battesimo rimanga come uno scudo, la fede come un elmo, la carità come una lancia, la pazienza come un'armatura.", autore: "Sant'Ignazio di Antiochia" }
 ];
 
