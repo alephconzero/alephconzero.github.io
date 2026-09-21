@@ -138,3 +138,150 @@ document.addEventListener("DOMContentLoaded", () => {
   // Poi attiva il ciclo automatico
   setInterval(mostraCitazione, durataVisibile);
 });
+
+// ======================
+// GLOSSARIO: tendine sui termini difficili
+// ======================
+// COME SI USA
+//  1) Nel testo (in qualsiasi articolo):
+//       <span class="termine">sincretico</span>
+//  2) Qui sotto aggiungi la definizione, con la stessa parola in minuscolo.
+//     La definizione si scrive una volta sola e vale per tutte le pagine.
+//
+// CASI PARTICOLARI
+//  - Nel testo la parola compare in un'altra forma (es. "sincretica", "sincretismo"):
+//      <span class="termine" data-termine="sincretico">sincretica</span>
+//  - Definizione valida solo in quel punto, senza passare da qui:
+//      <span class="termine" data-def="Testo della definizione">parola</span>
+//  - Le definizioni possono contenere HTML semplice: <em>, <strong>, <a href="...">.
+//  - Se un termine non ha definizione resta testo normale, e la console del browser
+//    (F12) segnala quale voce manca.
+const GLOSSARIO = {
+  "sincretico": "Che fonde insieme elementi di culture o religioni diverse in un unico sistema. Nel mondo antico era frequente: si adottavano gli dèi dei popoli vicini e li si affiancava ai propri.",
+  // "pantheon": "La definizione va qui.",
+};
+ 
+document.addEventListener("DOMContentLoaded", () => {
+  const termini = Array.from(document.querySelectorAll(".termine"));
+  if (!termini.length) return;
+ 
+  // Un'unica tendina condivisa da tutti i termini della pagina
+  const tendina = document.createElement("div");
+  tendina.id = "tendina-glossario";
+  tendina.className = "tendina";
+  tendina.setAttribute("role", "note");
+  tendina.setAttribute("aria-live", "polite");
+  tendina.setAttribute("aria-hidden", "true");
+  tendina.innerHTML =
+    '<button type="button" class="tendina-chiudi" tabindex="-1" aria-label="Chiudi la definizione">&times;</button>' +
+    '<strong class="tendina-titolo"></strong>' +
+    '<div class="tendina-testo"></div>';
+  document.body.appendChild(tendina);
+ 
+  const titolo = tendina.querySelector(".tendina-titolo");
+  const testo = tendina.querySelector(".tendina-testo");
+  const definizioni = new Map();
+  let attivo = null;
+ 
+  const chiaveDi = (el) =>
+    (el.dataset.termine || el.textContent).trim().toLowerCase().replace(/\s+/g, " ");
+ 
+  function posiziona(el) {
+    const margine = 12;
+    const distanza = 10;
+    const vw = document.documentElement.clientWidth;
+    const larghezza = Math.min(340, vw - margine * 2);
+    tendina.style.width = larghezza + "px";
+    const altezza = tendina.offsetHeight;
+ 
+    // se la parola va a capo, usa la prima e l'ultima riga
+    const righe = el.getClientRects();
+    const prima = righe[0];
+    const ultima = righe[righe.length - 1];
+    const centro = (ultima.left + ultima.right) / 2;
+ 
+    const sinistra = Math.max(margine, Math.min(centro - larghezza / 2, vw - larghezza - margine));
+ 
+    const spazioSotto = window.innerHeight - ultima.bottom;
+    const spazioSopra = prima.top;
+    const sotto = spazioSotto >= altezza + distanza + margine || spazioSotto >= spazioSopra;
+    const alto = sotto ? ultima.bottom + distanza : prima.top - altezza - distanza;
+ 
+    // la tendina e' dentro <body> (position: relative): si parte dall'origine del body
+    const corpo = document.body.getBoundingClientRect();
+    tendina.style.left = sinistra - corpo.left + "px";
+    tendina.style.top = alto - corpo.top + "px";
+    tendina.dataset.pos = sotto ? "sotto" : "sopra";
+    tendina.style.setProperty(
+      "--freccia-x",
+      Math.max(22, Math.min(centro - sinistra - 4, larghezza - 22)) + "px"
+    );
+  }
+ 
+  function apri(el) {
+    if (attivo && attivo !== el) attivo.setAttribute("aria-expanded", "false");
+    attivo = el;
+    titolo.textContent = el.textContent.trim();
+    testo.innerHTML = definizioni.get(el);
+    posiziona(el);
+    tendina.classList.add("aperta");
+    tendina.setAttribute("aria-hidden", "false");
+    el.setAttribute("aria-expanded", "true");
+  }
+ 
+  function chiudi(riportaFocus) {
+    if (!attivo) return;
+    const el = attivo;
+    attivo = null;
+    el.setAttribute("aria-expanded", "false");
+    tendina.classList.remove("aperta");
+    tendina.setAttribute("aria-hidden", "true");
+    if (riportaFocus) el.focus();
+  }
+ 
+  function alterna(el) {
+    if (attivo === el) chiudi(false);
+    else apri(el);
+  }
+ 
+  termini.forEach((el) => {
+    const definizione = el.dataset.def || GLOSSARIO[chiaveDi(el)];
+    if (!definizione) {
+      console.warn('Glossario: manca la definizione di "' + chiaveDi(el) + '"');
+      return;
+    }
+    definizioni.set(el, definizione);
+ 
+    el.setAttribute("role", "button");
+    el.setAttribute("tabindex", "0");
+    el.setAttribute("aria-expanded", "false");
+    el.setAttribute("aria-controls", "tendina-glossario");
+ 
+    el.addEventListener("click", () => alterna(el));
+    el.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      e.preventDefault();
+      alterna(el);
+    });
+  });
+ 
+  tendina.querySelector(".tendina-chiudi").addEventListener("click", () => chiudi(false));
+ 
+  // click fuori per chiudere
+  document.addEventListener("click", (e) => {
+    if (!attivo) return;
+    if (tendina.contains(e.target) || attivo.contains(e.target)) return;
+    chiudi(false);
+  });
+ 
+  // ESC per chiudere (il focus torna sulla parola)
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") chiudi(true);
+  });
+ 
+  // se la finestra cambia dimensione il testo va a capo altrove: riposiziona
+  window.addEventListener("resize", () => {
+    if (attivo) posiziona(attivo);
+  });
+});
+ 
