@@ -162,7 +162,7 @@ const GLOSSARIO = {
   "sincretico": "Che fonde insieme elementi di culture o religioni diverse in un unico sistema. Nel mondo antico era frequente: si adottavano gli dèi dei popoli vicini e li si affiancava ai propri.",
   "pantheon": "L'insieme di tutti gli dèi venerati da un popolo o da una religione politeista. Dal greco, «di tutti gli dèi».",
   "letteralismo": "Modo di leggere un testo, in particolare la Bibbia, prendendo ogni affermazione alla lettera, come una descrizione storica o scientifica esatta, senza considerare il genere letterario, la cultura e l'intenzione di chi scrive.",
-  "intellighenzia": "La parte colta di una società: intellettuali, studiosi, scrittori e professionisti che orientano la cultura e l'opinione pubblica. La parola viene dal russo.",
+  "intellighenzia": "La parte colta di una società: intellettuali, studiosi, scrittori e professionisti che orientano la cultura e l'opinione pubblica.",
   "canonici": "Detto dei libri che la Chiesa riconosce ufficialmente come ispirati e quindi parte della Bibbia. L'elenco di questi libri si chiama canone.",
   "agiografi": "In questo contesto, gli autori dei libri sacri. Il termine è più noto con un altro significato, chi scrive le vite dei santi, ma nel linguaggio teologico indica gli scrittori biblici.",
   "Magistero": "L'insegnamento ufficiale della Chiesa cattolica, esercitato dal Papa e dai vescovi (con concili, encicliche e altri documenti). Si distingue dalle opinioni dei singoli teologi.",
@@ -191,9 +191,9 @@ const GLOSSARIO = {
   "pil": "Prodotto interno lordo: il valore di tutti i beni e servizi prodotti in un paese in un anno. Misura la dimensione della sua economia.",
 
   // ---------- Dubbi, conti e cavalli ----------
-  "variabile casuale": "Una grandezza il cui valore dipende dal caso: per esempio il numero uscito da un dado o quanti soldati muoiono in un anno per un calcio di cavallo. La distribuzione di probabilità dice quanto è probabile ciascun valore.",
+  "variabile casuale": "Una grandezza il cui valore dipende dal caso: per esempio il numero uscito da un dado. La distribuzione di probabilità dice quanto è probabile ciascun valore.",
   "empiricamente": "Basandosi sull'osservazione e sui dati reali, e non solo sul ragionamento teorico.",
-  "fluttuazioni statistiche": "Le variazioni casuali attorno al valore medio: da un anno all'altro il numero di eventi cambia senza che ci sia una causa particolare. Il problema è capire quando una variazione è ancora normale e quando è troppo grande per essere solo caso.",
+  "fluttuazioni statistiche": "Le variazioni casuali attorno al valore medio: da un anno all'altro il numero di eventi cambia senza che ci sia una causa particolare.",
   "guerra franco-prussiana": "Guerra combattuta nel 1870-71 tra la Francia di Napoleone III e la Prussia, alleata agli altri stati tedeschi. Finì con la vittoria prussiana e portò alla nascita dell'Impero tedesco.",
   "poissoniana": "Nome informale, usato in questo articolo, per la distribuzione di Poisson, dal matematico francese Siméon Denis Poisson (1781-1840).",
   "retrocarica": "Detto di un'arma da fuoco che si carica da dietro e non dalla bocca della canna, molto più rapida da ricaricare dei vecchi fucili.",
