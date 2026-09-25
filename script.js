@@ -156,10 +156,49 @@ document.addEventListener("DOMContentLoaded", () => {
 //  - Le definizioni possono contenere HTML semplice: <em>, <strong>, <a href="...">.
 //  - Se un termine non ha definizione resta testo normale, e la console del browser
 //    (F12) segnala quale voce manca.
+
 const GLOSSARIO = {
+  // ---------- Come nasce una Bibbia? ----------
   "sincretico": "Che fonde insieme elementi di culture o religioni diverse in un unico sistema. Nel mondo antico era frequente: si adottavano gli dèi dei popoli vicini e li si affiancava ai propri.",
-  // "pantheon": "La definizione va qui.",
+  "pantheon": "L'insieme di tutti gli dèi venerati da un popolo o da una religione politeista. Dal greco, «di tutti gli dèi».",
+  "letteralismo": "Modo di leggere un testo, in particolare la Bibbia, prendendo ogni affermazione alla lettera, come una descrizione storica o scientifica esatta, senza considerare il genere letterario, la cultura e l'intenzione di chi scrive.",
+  "intellighenzia": "La parte colta di una società: intellettuali, studiosi, scrittori e professionisti che orientano la cultura e l'opinione pubblica. La parola viene dal russo.",
+  "canonici": "Detto dei libri che la Chiesa riconosce ufficialmente come ispirati e quindi parte della Bibbia. L'elenco di questi libri si chiama canone.",
+  "agiografi": "In questo contesto, gli autori dei libri sacri. Il termine è più noto con un altro significato, chi scrive le vite dei santi, ma nel linguaggio teologico indica gli scrittori biblici.",
+  "magistero": "L'insegnamento ufficiale della Chiesa cattolica, esercitato dal Papa e dai vescovi (con concili, encicliche e altri documenti). Si distingue dalle opinioni dei singoli teologi.",
+  "dei verbum": "Costituzione dogmatica sulla Rivelazione divina, uno dei documenti principali del Concilio Vaticano II. Fu promulgata nel 1965.",
+  "incarnazione": "Nella fede cristiana, il fatto che Dio, in Gesù, si è fatto uomo assumendo un corpo umano.",
+  "ispirazione": "Nella dottrina cattolica, l'azione con cui Dio assiste gli autori dei libri biblici. Restano veri autori, con la loro cultura, il loro stile e le loro capacità, ma ciò che scrivono trasmette ciò che Dio ha voluto. Non significa dettatura.",
+  "rivelazione": "Il farsi conoscere di Dio agli esseri umani: attraverso la creazione, la storia del popolo d'Israele, le Scritture e, per i cristiani in modo pieno, Gesù Cristo.",
+
+  // ---------- Fede e scienza fanno a cazzotti? ----------
+  "positivismo scientifico": "Corrente filosofica nata nell'Ottocento (il suo fondatore è Auguste Comte) secondo cui l'unica conoscenza valida è quella ottenuta con l'osservazione dei fatti e il metodo scientifico.",
+  "rivoluzione copernicana": "Il passaggio, nel Cinquecento, dall'idea che la Terra fosse ferma al centro dell'universo a quella che la Terra e i pianeti girino attorno al Sole (Niccolò Copernico, 1543). È una delle svolte all'origine della scienza moderna.",
+  "linguaggio mitico": "«Mito» non vuol dire «falso». Indica un racconto simbolico con cui un popolo esprime il senso ultimo delle cose (da dove veniamo, perché esiste il male, chi è Dio) usando immagini e non descrizioni scientifiche.",
+  "magisteri non sovrapponibili": "Idea del biologo Stephen Jay Gould (in inglese <em>non-overlapping magisteria</em>): scienza e religione si occupano di ambiti diversi, i fatti da una parte e i valori e il senso dall'altra, e quindi non possono entrare in conflitto. Qui «magistero» è usato nel senso generico di «ambito di autorità».",
+  "biblistica": "La disciplina che studia la Bibbia con metodi scientifici: testi, lingue originali, storia della composizione e interpretazione.",
+  "dei filius": "Costituzione dogmatica del Concilio Vaticano I (1870) sulla fede cattolica e sul rapporto tra fede e ragione.",
+  "fides et ratio": "Enciclica di Giovanni Paolo II (1998) dedicata al rapporto tra fede e ragione.",
+
+  // ---------- Droghe matematiche: la crisi del 2008 ----------
+  "insolvente": "Chi non riesce più a pagare i propri debiti alla scadenza. L'insolvenza è questa condizione.",
+  "derivati creditizi": "Strumenti finanziari il cui valore dipende da altri crediti, come mutui e prestiti. Servono a trasferire ad altri il rischio che un debito non venga restituito.",
+  "copula gaussiana": "Strumento matematico che descrive come più eventi (qui, il fallimento di diversi debitori) dipendono l'uno dall'altro, usando come base la distribuzione gaussiana. Fu usato per stimare il rischio dei CDO.",
+  "code": "Le due estremità del grafico di una distribuzione, lontane dal valore più frequente. Corrispondono agli eventi rari ed estremi: più la coda è «spessa», più questi eventi sono probabili.",
+  "power law": "Distribuzione di probabilità (in italiano «legge di potenza») in cui gli eventi estremi sono molto meno rari che in una gaussiana, perché le sue code calano lentamente. La si osserva, per esempio, nell'energia dei terremoti e nella distribuzione della ricchezza.",
+  "indipendenti": "Due eventi sono indipendenti quando il verificarsi dell'uno non cambia la probabilità dell'altro. Due lanci di moneta lo sono. Il fallimento di un debitore e quello di chi vive del suo lavoro, no.",
+  "deregolamentazione": "Riduzione o eliminazione delle regole con cui lo Stato controlla un settore. In finanza, le regole su cosa le banche possono fare.",
+  "pil": "Prodotto interno lordo: il valore di tutti i beni e servizi prodotti in un paese in un anno. Misura la dimensione della sua economia.",
+
+  // ---------- Dubbi, conti e cavalli ----------
+  "variabile casuale": "Una grandezza il cui valore dipende dal caso: per esempio il numero uscito da un dado o quanti soldati muoiono in un anno per un calcio di cavallo. La distribuzione di probabilità dice quanto è probabile ciascun valore.",
+  "empiricamente": "Basandosi sull'osservazione e sui dati reali, e non solo sul ragionamento teorico.",
+  "fluttuazioni statistiche": "Le variazioni casuali attorno al valore medio: da un anno all'altro il numero di eventi cambia senza che ci sia una causa particolare. Il problema è capire quando una variazione è ancora normale e quando è troppo grande per essere solo caso.",
+  "guerra franco-prussiana": "Guerra combattuta nel 1870-71 tra la Francia di Napoleone III e la Prussia, alleata agli altri stati tedeschi. Finì con la vittoria prussiana e portò alla nascita dell'Impero tedesco.",
+  "poissoniana": "Nome informale, usato in questo articolo, per la distribuzione di Poisson, dal matematico francese Siméon Denis Poisson (1781-1840).",
+  "retrocarica": "Detto di un'arma da fuoco che si carica da dietro e non dalla bocca della canna, molto più rapida da ricaricare dei vecchi fucili.",
 };
+
  
 document.addEventListener("DOMContentLoaded", () => {
   const termini = Array.from(document.querySelectorAll(".termine"));
