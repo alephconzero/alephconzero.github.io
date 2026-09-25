@@ -165,8 +165,8 @@ const GLOSSARIO = {
   "intellighenzia": "La parte colta di una società: intellettuali, studiosi, scrittori e professionisti che orientano la cultura e l'opinione pubblica. La parola viene dal russo.",
   "canonici": "Detto dei libri che la Chiesa riconosce ufficialmente come ispirati e quindi parte della Bibbia. L'elenco di questi libri si chiama canone.",
   "agiografi": "In questo contesto, gli autori dei libri sacri. Il termine è più noto con un altro significato, chi scrive le vite dei santi, ma nel linguaggio teologico indica gli scrittori biblici.",
-  "magistero": "L'insegnamento ufficiale della Chiesa cattolica, esercitato dal Papa e dai vescovi (con concili, encicliche e altri documenti). Si distingue dalle opinioni dei singoli teologi.",
-  "dei verbum": "Costituzione dogmatica sulla Rivelazione divina, uno dei documenti principali del Concilio Vaticano II. Fu promulgata nel 1965.",
+  "Magistero": "L'insegnamento ufficiale della Chiesa cattolica, esercitato dal Papa e dai vescovi (con concili, encicliche e altri documenti). Si distingue dalle opinioni dei singoli teologi.",
+  "Dei Verbum": "Costituzione dogmatica sulla Rivelazione divina, uno dei documenti principali del Concilio Vaticano II. Fu promulgata nel 1965.",
   "incarnazione": "Nella fede cristiana, il fatto che Dio, in Gesù, si è fatto uomo assumendo un corpo umano.",
   "ispirazione": "Nella dottrina cattolica, l'azione con cui Dio assiste gli autori dei libri biblici. Restano veri autori, con la loro cultura, il loro stile e le loro capacità, ma ciò che scrivono trasmette ciò che Dio ha voluto. Non significa dettatura.",
   "rivelazione": "Il farsi conoscere di Dio agli esseri umani: attraverso la creazione, la storia del popolo d'Israele, le Scritture e, per i cristiani in modo pieno, Gesù Cristo.",
@@ -177,8 +177,8 @@ const GLOSSARIO = {
   "linguaggio mitico": "«Mito» non vuol dire «falso». Indica un racconto simbolico con cui un popolo esprime il senso ultimo delle cose (da dove veniamo, perché esiste il male, chi è Dio) usando immagini e non descrizioni scientifiche.",
   "magisteri non sovrapponibili": "Idea del biologo Stephen Jay Gould (in inglese <em>non-overlapping magisteria</em>): scienza e religione si occupano di ambiti diversi, i fatti da una parte e i valori e il senso dall'altra, e quindi non possono entrare in conflitto. Qui «magistero» è usato nel senso generico di «ambito di autorità».",
   "biblistica": "La disciplina che studia la Bibbia con metodi scientifici: testi, lingue originali, storia della composizione e interpretazione.",
-  "dei filius": "Costituzione dogmatica del Concilio Vaticano I (1870) sulla fede cattolica e sul rapporto tra fede e ragione.",
-  "fides et ratio": "Enciclica di Giovanni Paolo II (1998) dedicata al rapporto tra fede e ragione.",
+  "Dei Filius": "Costituzione dogmatica del Concilio Vaticano I (1870) sulla fede cattolica e sul rapporto tra fede e ragione.",
+  "Fides et ratio": "Enciclica di Giovanni Paolo II (1998) dedicata al rapporto tra fede e ragione.",
 
   // ---------- Droghe matematiche: la crisi del 2008 ----------
   "insolvente": "Chi non riesce più a pagare i propri debiti alla scadenza. L'insolvenza è questa condizione.",
