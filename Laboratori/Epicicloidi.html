@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Laboratorio interattivo su epicicloidi e ipocicloidi: cambia il rapporto tra i raggi e scopri quando la curva si chiude e quando non si chiude mai.">
+  <title>Epicicloidi e ipocicloidi – Laboratorio AlephconZero</title>
+  <link rel="canonical" href="https://www.alephconzero.com/Laboratori/Epicicloidi.html">
+  <link rel="icon" href="../favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="../stile.css?v=7">
+
+  <!-- Formule matematiche (stessa configurazione degli articoli) -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']]
+      }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <style>
+    /* =========================================================
+       EPICICLOIDI – layout del laboratorio
+       Stessa impostazione del pendolo doppio: colori, font,
+       cursori e pulsanti arrivano da stile.css; qui c'è solo
+       la disposizione degli elementi e qualche dettaglio in più.
+    ========================================================= */
+
+    .laboratorio-testata { margin: 0 0 30px; }
+    .laboratorio-spiegazione { margin: 36px auto 0; }
+
+    .simulatore { margin: 25px 0 0; padding: 22px; }
+
+    .simulatore-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 300px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .area-simulazione { overflow: visible; }
+
+    .canvas-toolbar {
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      min-height: 0;
+      gap: 4px 16px;
+      padding: 8px 12px;
+    }
+
+    .legenda-colore.cerchio-fisso { background: var(--text-soft); }
+    .legenda-colore.cerchio-mobile { background: var(--lab-b); }
+    .legenda-colore.curva { background: var(--lab-a); }
+
+    #k-output { min-width: 4ch; }
+    #turns-output { min-width: 5ch; }
+    #cusps-output { min-width: 3ch; }
+
+    /* Riquadro quadrato: le curve hanno simmetria circolare */
+    .canvas-frame {
+      aspect-ratio: 1 / 1;
+      min-height: 0;
+      max-height: 78vh;
+    }
+
+    #epi-canvas {
+      position: absolute;
+      inset: 0;
+      display: block;
+      width: 100%;
+      height: 100%;
+      touch-action: pan-y;
+    }
+
+    .azioni-simulazione {
+      grid-template-columns: 1.5fr 1fr;
+      gap: 10px;
+      margin: 12px 0 0;
+    }
+
+    .button-principale { grid-column: auto; }
+
+    .azioni-simulazione .button {
+      min-height: 48px;
+      font-size: 0.85em;
+    }
+
+    /* Pannello dei parametri (<details>) */
+    .pannello-controlli { padding: 0; }
+
+    .pannello-controlli > summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 52px;
+      padding: 12px 18px;
+      font-size: 0.9em;
+      font-weight: 700;
+      color: var(--accent-dark);
+      cursor: pointer;
+      list-style: none;
+    }
+
+    .pannello-controlli > summary::-webkit-details-marker { display: none; }
+
+    .pannello-controlli > summary::after {
+      content: "";
+      flex: 0 0 auto;
+      width: 9px;
+      height: 9px;
+      margin-top: -4px;
+      border-right: 2px solid currentColor;
+      border-bottom: 2px solid currentColor;
+      transform: rotate(45deg);
+      transition: transform 0.2s ease, margin 0.2s ease;
+    }
+
+    .pannello-controlli[open] > summary { border-bottom: 1px solid var(--border-soft); }
+
+    .pannello-controlli[open] > summary::after {
+      margin-top: 4px;
+      transform: rotate(-135deg);
+    }
+
+    .pannello-controlli > summary:focus-visible {
+      outline: 2px solid var(--accent-dark);
+      outline-offset: -3px;
+      border-radius: 12px;
+    }
+
+    .controlli-corpo { padding: 18px; }
+    .controlli-intestazione h3 { display: block; }
+
+    .controlli-grid {
+      grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+      align-items: stretch;
+    }
+
+    .controlli-grid .gruppo-controlli { height: auto; margin: 0; }
+
+    .preset-row {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      margin-bottom: 16px;
+    }
+
+    .preset-row .button { min-height: 40px; }
+
+    /* Scelta epicicloide / ipocicloide */
+    .gruppo-controlli .check-row + .check-row { margin-top: 8px; }
+
+    .check-row small {
+      display: block;
+      color: var(--text-muted);
+      font-size: 0.85em;
+    }
+
+    /* Rapporti irrazionali */
+    .sottotitolo-controlli {
+      margin: 16px 0 8px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border-soft);
+      font-size: 0.8em;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .irrazionali-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    .irrazionali-row .button {
+      min-height: 40px;
+      padding-left: 0;
+      padding-right: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1em;
+    }
+
+    .irrazionali-row .button[aria-pressed="true"] {
+      border-color: var(--accent-dark);
+      background: var(--accent-dark);
+      color: #ffffff;
+    }
+
+    .gruppo-visualizzazione .button {
+      width: 100%;
+      margin-top: 10px;
+      min-height: 40px;
+    }
+
+    .gruppo-visualizzazione .check-row { margin-top: 12px; }
+
+    /* Riquadro che spiega che cosa succede con il k scelto */
+    .box-k {
+      margin: 0 0 16px;
+      padding: 12px 14px;
+      border-left: 4px solid var(--lab-a);
+      border-radius: 8px;
+      background: var(--bg-paper-soft);
+      font-size: 0.78em;
+      line-height: 1.5;
+      color: var(--text-main);
+    }
+
+    .box-k p { margin: 0; text-align: left; }
+    .box-k p + p { margin-top: 6px; }
+    .box-k.avviso { border-left-color: var(--lab-b); }
+
+    /* Formule lunghe: scorrono invece di uscire dallo schermo */
+    .laboratorio-spiegazione mjx-container[display="true"] {
+      overflow-x: auto;
+      overflow-y: hidden;
+      max-width: 100%;
+    }
+
+    .laboratorio-spiegazione ul { text-align: left; }
+    .laboratorio-spiegazione li + li { margin-top: 6px; }
+
+    /* Desktop: pannello sempre aperto, animazione che segue lo scorrimento */
+    @media (min-width: 901px) {
+      .pannello-controlli > summary { display: none; }
+      .area-simulazione { position: sticky; top: 16px; }
+    }
+
+    /* Tablet e smartphone: una sola colonna */
+    @media (max-width: 900px) {
+      .simulatore-layout {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .area-simulazione,
+      .pannello-controlli {
+        width: 100%;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      .controlli-corpo { padding-top: 6px; }
+      .controlli-intestazione h3 { display: none; }
+
+      #epi-canvas { min-height: 0; }
+    }
+
+    /* Smartphone */
+    @media (max-width: 700px) {
+      .simulatore {
+        margin: 18px 0 0;
+        padding: 10px;
+        border-radius: 12px;
+      }
+
+      .area-simulazione {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        padding: 4px 0 10px;
+        background: var(--bg-panel);
+      }
+
+      .simulatore-layout:has(.pannello-controlli[open]) .canvas-frame { max-height: 38vh; }
+
+      .controlli-corpo { padding: 6px 14px 16px; }
+
+      .canvas-toolbar { flex-direction: row; }
+    }
+
+    @media (max-width: 700px) and (max-height: 700px) {
+      .simulatore-layout:has(.pannello-controlli[open]) .canvas-frame { max-height: 30vh; }
+    }
+
+    @media (max-width: 420px) {
+      .preset-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .azioni-simulazione { grid-template-columns: 1.5fr 1fr; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .pannello-controlli > summary::after { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="progress-bar"></div>
+
+  <header>
+    <h1 class="logo">
+      <span class="logo-aleph">ℵ</span><span class="logo-zero">0</span>
+    </h1>
+    <h2>Per mettere i pensieri in fila</h2>
+  </header>
+
+  <div class="menu-container">
+    <div class="hamburger" id="hamburger" role="button" tabindex="0" aria-label="Apri il menu" aria-controls="menu" aria-expanded="false">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+
+    <nav class="menu" id="menu" aria-label="Navigazione principale">
+      <a href="../index.html">Home</a>
+      <a href="../Chisono.html">Chi sono</a>
+      <a href="../Lasquadrasgorbi.html">La Squadra Sgorbi</a>
+      <a href="../Articoli.html">Articoli</a>
+      <a href="../Laboratorio.html" aria-current="page">Laboratorio</a>
+      <a href="../Bibliografia.html">Bibliografia</a>
+      <a href="../contatti.html">Contatti</a>
+      <a href="../privacy.html">Privacy Policy</a>
+    </nav>
+  </div>
+
+  <main>
+    <article class="laboratorio-pagina">
+      <div class="laboratorio-testata">
+        <p class="laboratorio-breadcrumb"><a href="../Laboratorio.html">Laboratorio</a> / Epicicloidi e ipocicloidi</p>
+        <h2>Epicicloidi e ipocicloidi</h2>
+        <p>
+          Un cerchio rotola senza strisciare attorno a un altro, all’esterno o all’interno, e un punto del suo bordo
+          lascia una traccia. Tutto dipende da un solo numero: il rapporto tra i due raggi. Sceglilo e scopri quando
+          la curva si chiude, dopo quanti giri, e quando invece non si chiude mai.
+        </p>
+      </div>
+
+      <section class="simulatore" aria-labelledby="titolo-simulatore">
+        <h3 id="titolo-simulatore" class="sr-only">Simulatore interattivo</h3>
+
+        <div class="simulatore-layout">
+
+          <!-- Colonna principale: misure, animazione e pulsanti -->
+          <div class="area-simulazione">
+            <div class="canvas-toolbar" role="group" aria-label="Legenda e misure">
+              <div class="legenda-simulazione">
+                <span><i class="legenda-colore cerchio-fisso"></i>Cerchio fisso</span>
+                <span><i class="legenda-colore cerchio-mobile"></i>Cerchio mobile</span>
+                <span><i class="legenda-colore curva"></i>Curva</span>
+              </div>
+              <div class="dati-simulazione">
+                <span>k = <strong id="k-output">3</strong></span>
+                <span>Giri: <strong id="turns-output">0,00</strong></span>
+                <span>Cuspidi: <strong id="cusps-output">0</strong></span>
+              </div>
+            </div>
+
+            <div class="canvas-frame">
+              <canvas id="epi-canvas" aria-label="Animazione di un cerchio che rotola attorno a un cerchio fisso e della curva tracciata da un suo punto" role="img">
+                Il tuo browser non supporta l'elemento canvas necessario per questa simulazione.
+              </canvas>
+              <div id="canvas-message" class="canvas-message is-hidden" role="status" aria-live="polite"></div>
+            </div>
+
+            <div class="azioni-simulazione">
+              <button id="start-pause" type="button" class="button button-principale">Avvia</button>
+              <button id="reset" type="button" class="button button-secondario">Ripristina</button>
+            </div>
+          </div>
+
+          <!-- Parametri: sempre aperti su desktop, ripiegabili su smartphone -->
+          <details class="pannello-controlli" id="controls-panel" open>
+            <summary>Parametri e opzioni</summary>
+
+            <div class="controlli-corpo">
+              <div class="controlli-intestazione">
+                <h3>Parametri</h3>
+                <p>Scegli il tipo di curva e il rapporto k = R / r tra il raggio del cerchio fisso e quello del cerchio mobile.</p>
+              </div>
+
+              <div id="box-k" class="box-k" aria-live="polite"></div>
+
+              <div class="preset-row" aria-label="Curve celebri">
+                <button type="button" class="button button-secondario preset-button" data-preset="cardioide">Cardioide</button>
+                <button type="button" class="button button-secondario preset-button" data-preset="nefroide">Nefroide</button>
+                <button type="button" class="button button-secondario preset-button" data-preset="deltoide">Deltoide</button>
+                <button type="button" class="button button-secondario preset-button" data-preset="astroide">Astroide</button>
+                <button type="button" class="button button-secondario preset-button" data-preset="segmento">Segmento</button>
+                <button type="button" class="button button-secondario preset-button" data-preset="stella">Stella</button>
+              </div>
+
+              <div class="controlli-grid">
+                <fieldset class="gruppo-controlli">
+                  <legend>Tipo di curva</legend>
+
+                  <label class="check-row" for="type-epi">
+                    <input id="type-epi" type="radio" name="tipo" value="epi" checked>
+                    <span>Epicicloide<small>il cerchio rotola all’esterno</small></span>
+                  </label>
+
+                  <label class="check-row" for="type-hypo">
+                    <input id="type-hypo" type="radio" name="tipo" value="hypo">
+                    <span>Ipocicloide<small>il cerchio rotola all’interno</small></span>
+                  </label>
+                </fieldset>
+
+                <fieldset class="gruppo-controlli">
+                  <legend>Rapporto k = p / q</legend>
+
+                  <div class="parametro">
+                    <div class="parametro-label">
+                      <label for="p-range">Numeratore p</label>
+                      <div class="input-con-unita">
+                        <input id="p-number" class="parametro-number" type="number" min="1" max="24" step="1" value="3" inputmode="numeric">
+                      </div>
+                    </div>
+                    <input id="p-range" class="parametro-range" type="range" min="1" max="24" step="1" value="3">
+                  </div>
+
+                  <div class="parametro">
+                    <div class="parametro-label">
+                      <label for="q-range">Denominatore q</label>
+                      <div class="input-con-unita">
+                        <input id="q-number" class="parametro-number" type="number" min="1" max="12" step="1" value="1" inputmode="numeric">
+                      </div>
+                    </div>
+                    <input id="q-range" class="parametro-range" type="range" min="1" max="12" step="1" value="1">
+                  </div>
+
+                  <p class="sottotitolo-controlli">Oppure un rapporto irrazionale</p>
+                  <div class="irrazionali-row" role="group" aria-label="Rapporti irrazionali">
+                    <button type="button" class="button button-secondario irr-button" data-irr="sqrt2" aria-pressed="false" title="Radice di 2">√2</button>
+                    <button type="button" class="button button-secondario irr-button" data-irr="phi" aria-pressed="false" title="Sezione aurea">φ</button>
+                    <button type="button" class="button button-secondario irr-button" data-irr="pi" aria-pressed="false" title="Pi greco">π</button>
+                    <button type="button" class="button button-secondario irr-button" data-irr="e" aria-pressed="false" title="Numero di Nepero">e</button>
+                  </div>
+                </fieldset>
+
+                <fieldset class="gruppo-controlli gruppo-visualizzazione">
+                  <legend>Visualizzazione</legend>
+
+                  <div class="parametro">
+                    <div class="parametro-label">
+                      <label for="speed-range">Velocità</label>
+                      <output id="speed-output" for="speed-range">1×</output>
+                    </div>
+                    <input id="speed-range" class="parametro-range" type="range" min="0.25" max="4" step="0.25" value="1">
+                  </div>
+
+                  <label class="check-row" for="circles-toggle">
+                    <input id="circles-toggle" type="checkbox" checked>
+                    <span>Mostra i cerchi</span>
+                  </label>
+
+                  <button id="draw-all" type="button" class="button button-secondario">Disegna subito</button>
+                  <button id="clear-trace" type="button" class="button button-secondario">Cancella traccia</button>
+                </fieldset>
+              </div>
+
+              <p class="nota-controlli">Cambiando tipo di curva o rapporto la traccia ricomincia da capo.</p>
+            </div>
+          </details>
+
+        </div>
+      </section>
+
+      <section class="laboratorio-spiegazione">
+        <h3>Come nasce la curva</h3>
+        <p>
+          Un cerchio di raggio \(r\) rotola senza strisciare lungo un cerchio fisso di raggio \(R\). Se rotola
+          all’esterno, un punto del suo bordo descrive un’<strong>epicicloide</strong>; se rotola all’interno,
+          un’<strong>ipocicloide</strong>. Sono parenti stretti della cicloide, la curva tracciata da un punto di una
+          ruota che avanza su una strada dritta.
+        </p>
+        <p>
+          Chiamiamo \(\theta\) l’angolo che individua la posizione del centro del cerchio mobile. “Senza strisciare”
+          vuol dire che gli archi a contatto sono uguali: l’arco percorso sul cerchio fisso, \(R\theta\), è uguale
+          all’arco srotolato sul cerchio mobile. Da questa sola condizione si ricavano le equazioni parametriche.
+          Per l’epicicloide:
+        </p>
+        \[
+          \begin{aligned}
+            x &= (R+r)\cos\theta - r\cos\!\left(\frac{R+r}{r}\,\theta\right)\\
+            y &= (R+r)\sin\theta - r\sin\!\left(\frac{R+r}{r}\,\theta\right)
+          \end{aligned}
+        \]
+        <p>e per l’ipocicloide, dove il cerchio mobile gira nel verso opposto:</p>
+        \[
+          \begin{aligned}
+            x &= (R-r)\cos\theta + r\cos\!\left(\frac{R-r}{r}\,\theta\right)\\
+            y &= (R-r)\sin\theta - r\sin\!\left(\frac{R-r}{r}\,\theta\right)
+          \end{aligned}
+        \]
+        <p>
+          C’è un dettaglio sorprendente. Rotolando all’esterno, il cerchio mobile ruota su sé stesso di
+          \(\frac{R+r}{r}\theta\), non di \(\frac{R}{r}\theta\): al rotolamento si somma il giro che il cerchio compie
+          <em>attorno</em> a quello fisso. È il paradosso della moneta: una moneta che rotola attorno a un’altra
+          uguale compie due rotazioni complete, non una. Lo stesso meccanismo rende il giorno siderale più corto di
+          quello solare.
+        </p>
+
+        <h3>Tutto dipende da k = R / r</h3>
+        <p>
+          La forma della curva dipende soltanto dal rapporto \(k = R/r\); il valore di \(r\) fissa solo la scala del
+          disegno. La domanda decisiva è: <em>dopo quanti giri il punto torna dove era partito?</em> Perché accada,
+          il centro deve aver compiuto un numero intero \(n\) di giri attorno al cerchio fisso e, nello stesso tempo,
+          l’arco srotolato \(2\pi R\, n\) deve corrispondere a un numero intero \(m\) di circonferenze del cerchio
+          mobile. Cioè \(R\,n = r\,m\), ovvero \(k = m/n\).
+        </p>
+        <p>
+          <strong>Se k è intero</strong> basta un giro: la curva si chiude subito e ha esattamente \(k\)
+          <em>cuspidi</em>, le punte in cui il punto tocca il cerchio fisso e, per un istante, è fermo.
+        </p>
+        <p>
+          <strong>Se k = p/q è razionale</strong> (ridotto ai minimi termini) servono \(q\) giri attorno al cerchio
+          fisso, e lungo il percorso si formano \(p\) cuspidi. Prova per esempio \(k = 5/2\) o \(k = 7/3\).
+        </p>
+        <p>
+          <strong>Se k è irrazionale</strong> l’uguaglianza \(k = m/n\) è impossibile: il punto non ripassa mai dalla
+          posizione iniziale e la curva non si chiude. Giro dopo giro, la traccia riempie in modo denso una corona
+          circolare. È la stessa distinzione che separa le figure di Lissajous con frequenze commensurabili da quelle
+          con frequenze incommensurabili, e i moti periodici da quelli quasi periodici.
+        </p>
+
+        <h3>Alcune curve con un nome</h3>
+        <ul>
+          <li><strong>Cardioide</strong> (epicicloide, \(k = 1\)): ha la forma di un cuore e, non per caso, è il contorno del bulbo principale dell’insieme di Mandelbrot.</li>
+          <li><strong>Nefroide</strong> (epicicloide, \(k = 2\)): è la caustica luminosa che si vede sul fondo di una tazza illuminata di lato.</li>
+          <li><strong>Segmento</strong> (ipocicloide, \(k = 2\)): il punto oscilla avanti e indietro lungo un diametro. È la <em>coppia di al-Tusi</em>, ideata nel XIII secolo per ottenere un moto rettilineo da moti circolari e ripresa da Copernico.</li>
+          <li><strong>Deltoide</strong> (ipocicloide, \(k = 3\)): un triangolo curvilineo con tre cuspidi.</li>
+          <li><strong>Astroide</strong> (ipocicloide, \(k = 4\)): ha equazione cartesiana \(x^{2/3} + y^{2/3} = R^{2/3}\) ed è l’inviluppo di una scala che scivola lungo un muro.</li>
+          <li><strong>Stella</strong> (ipocicloide, \(k = 5/2\)): cinque punte disegnate in due giri.</li>
+        </ul>
+
+        <div class="nota-fisica">
+          <strong>Come è fatto:</strong> la curva non è simulata passo passo, ma calcolata direttamente dalle equazioni
+          parametriche al crescere di \(\theta\). Un’avvertenza: un computer non può memorizzare un numero irrazionale,
+          solo una sua approssimazione finita, che a rigore è razionale. Il denominatore però è così grande che la curva
+          si chiuderebbe dopo milioni di miliardi di giri: sullo schermo il comportamento è indistinguibile da quello
+          irrazionale.
+        </div>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>© 2026 ℵ₀ – AlephconZero</p>
+    <p><small><em>Gira, gira, e prima o poi torna. Oppure no.</em></small></p>
+  </footer>
+
+  <script src="../script.js"></script>
+  <script>
+  (() => {
+    "use strict";
+
+    const canvas = document.getElementById("epi-canvas");
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // ---------------------------------------------------------
+    // Elementi della pagina
+    // ---------------------------------------------------------
+    const $ = (id) => document.getElementById(id);
+
+    const controls = {
+      pRange: $("p-range"),
+      pNumber: $("p-number"),
+      qRange: $("q-range"),
+      qNumber: $("q-number"),
+      speed: $("speed-range"),
+      speedOutput: $("speed-output"),
+      circles: $("circles-toggle")
+    };
+
+    const typeRadios = document.querySelectorAll('input[name="tipo"]');
+    const irrButtons = document.querySelectorAll(".irr-button");
+    const presetButtons = document.querySelectorAll(".preset-button");
+    const startPauseButton = $("start-pause");
+    const resetButton = $("reset");
+    const drawAllButton = $("draw-all");
+    const clearTraceButton = $("clear-trace");
+    const kOutput = $("k-output");
+    const turnsOutput = $("turns-output");
+    const cuspsOutput = $("cusps-output");
+    const boxK = $("box-k");
+    const messageBox = $("canvas-message");
+    const frameElement = canvas.closest(".canvas-frame");
+    const controlsPanel = $("controls-panel");
+
+    // ---------------------------------------------------------
+    // Costanti
+    // ---------------------------------------------------------
+    const TAU = 2 * Math.PI;
+    const BASE_SPEED = TAU / 7;     // velocità angolare del centro (rad/s) a velocità 1×
+    const MAX_TURNS_IRR = 200;      // con k irrazionale ci si ferma dopo questi giri
+    const TURNS_PER_CLICK = 40;     // giri aggiunti da "Disegna subito" se k è irrazionale
+    const EDGE_MARGIN = 18;         // spazio libero (px) tra il disegno e il bordo
+
+    const IRRAZIONALI = {
+      sqrt2: { value: Math.SQRT2, label: "√2" },
+      phi: { value: (1 + Math.sqrt(5)) / 2, label: "φ" },
+      pi: { value: Math.PI, label: "π" },
+      e: { value: Math.E, label: "e" }
+    };
+
+    const PRESETS = {
+      cardioide: { type: "epi", p: 1, q: 1 },
+      nefroide: { type: "epi", p: 2, q: 1 },
+      deltoide: { type: "hypo", p: 3, q: 1 },
+      astroide: { type: "hypo", p: 4, q: 1 },
+      segmento: { type: "hypo", p: 2, q: 1 },
+      stella: { type: "hypo", p: 5, q: 2 }
+    };
+
+    const css = getComputedStyle(document.documentElement);
+    const cssVar = (name, fallback) => css.getPropertyValue(name).trim() || fallback;
+    const palette = {
+      background: cssVar("--bg-paper", "#fcfaf6"),
+      grid: "rgba(72, 96, 106, 0.10)",
+      fixed: cssVar("--text-soft", "#5d5d5d"),
+      fixedFill: "rgba(72, 96, 106, 0.06)",
+      rolling: cssVar("--lab-b", "#a66b43"),
+      rollingFill: "rgba(166, 107, 67, 0.10)",
+      point: cssVar("--lab-b-dark", "#7f4f33"),
+      curve: cssVar("--lab-a", "#48606a")
+    };
+
+    // ---------------------------------------------------------
+    // Stato
+    // ---------------------------------------------------------
+    let irrationalKey = null;   // null = rapporto razionale p/q
+    let theta = 0;              // angolo del centro del cerchio mobile
+    let drawnTheta = 0;         // fin dove la curva è già stata disegnata
+    let traceStart = 0;         // da dove è partita la traccia attuale
+    let closed = false;         // la curva (razionale) si è chiusa
+    let running = false;
+    let lastTimestamp = null;
+    let animationFrameId = null;
+    let messageTimer = null;
+    let canvasWidth = 0;
+    let canvasHeight = 0;
+    let dpr = 1;
+
+    // La curva viene disegnata su un secondo canvas invisibile ("livello"),
+    // così non va ricalcolata a ogni fotogramma: si aggiunge solo il pezzo nuovo.
+    const layer = document.createElement("canvas");
+    const lctx = layer.getContext("2d");
+
+    // ---------------------------------------------------------
+    // Utilità
+    // ---------------------------------------------------------
+    function clamp(value, min, max) {
+      return Math.min(max, Math.max(min, value));
+    }
+
+    function gcd(a, b) {
+      while (b) [a, b] = [b, a % b];
+      return a;
+    }
+
+    function formatNumber(value, digits) {
+      return new Intl.NumberFormat("it-IT", {
+        minimumFractionDigits: digits,
+        maximumFractionDigits: digits
+      }).format(value);
+    }
+
+    function intValue(element, fallback) {
+      const value = Number.parseInt(element.value, 10);
+      return Number.isFinite(value) ? value : fallback;
+    }
+
+    function plural(n, one, many) {
+      return n === 1 ? one : many;
+    }
+
+    // ---------------------------------------------------------
+    // Configurazione corrente: tipo di curva e rapporto k
+    // ---------------------------------------------------------
+    function getConfig() {
+      const checked = document.querySelector('input[name="tipo"]:checked');
+      const type = checked ? checked.value : "epi";
+      const p = clamp(intValue(controls.pNumber, 3), 1, 24);
+      const q = clamp(intValue(controls.qNumber, 1), 1, 12);
+
+      let k, rational, P = null, Q = null, label;
+
+      if (irrationalKey) {
+        k = IRRAZIONALI[irrationalKey].value;
+        rational = false;
+        label = IRRAZIONALI[irrationalKey].label;
+      } else {
+        const g = gcd(p, q);
+        P = p / g;
+        Q = q / g;
+        k = p / q;
+        rational = true;
+        label = Q === 1 ? String(P) : `${P}/${Q}`;
+      }
+
+      // Per l'ipocicloide il cerchio mobile deve stare dentro quello fisso
+      const valid = type === "epi" ? k > 0 : k > 1;
+
+      // Raggio del centro e fattore di rotazione del cerchio mobile (con r = 1, R = k)
+      const a = type === "epi" ? k + 1 : k - 1;
+
+      return {
+        type, p, q, k, P, Q, rational, label, valid, a,
+        thetaClose: rational ? TAU * Q : Infinity,
+        thetaMax: rational ? TAU * Q : TAU * MAX_TURNS_IRR,
+        // Distanza massima dal centro raggiunta dal disegno (in unità di r)
+        extent: type === "epi" ? k + 2 : Math.max(k, 1)
+      };
+    }
+
+    // ---------------------------------------------------------
+    // Le equazioni parametriche (r = 1, R = k)
+    // ---------------------------------------------------------
+    function centerAt(t, c) {
+      return { x: c.a * Math.cos(t), y: c.a * Math.sin(t) };
+    }
+
+    function pointAt(t, c) {
+      const phi = c.a * t;
+      if (c.type === "epi") {
+        return {
+          x: c.a * Math.cos(t) - Math.cos(phi),
+          y: c.a * Math.sin(t) - Math.sin(phi)
+        };
+      }
+      return {
+        x: c.a * Math.cos(t) + Math.cos(phi),
+        y: c.a * Math.sin(t) - Math.sin(phi)
+      };
+    }
+
+    // ---------------------------------------------------------
+    // Geometria del disegno
+    // ---------------------------------------------------------
+    function geometry(c) {
+      const available = Math.min(canvasWidth, canvasHeight) / 2 - EDGE_MARGIN;
+      return {
+        cx: canvasWidth / 2,
+        cy: canvasHeight / 2,
+        scale: Math.max(1, available) / c.extent
+      };
+    }
+
+    // In matematica l'asse y va verso l'alto, sullo schermo verso il basso
+    function toCanvas(point, g) {
+      return { x: g.cx + point.x * g.scale, y: g.cy - point.y * g.scale };
+    }
+
+    // Passo angolare: abbastanza piccolo da avere segmenti di circa 1,5 pixel
+    function angularStep(c, g) {
+      const pixelsPerRadian = 2 * Math.abs(c.a) * g.scale + 1;
+      return clamp(1.5 / pixelsPerRadian, 1e-4, 0.02);
+    }
+
+    // ---------------------------------------------------------
+    // Disegno della curva sul livello
+    // ---------------------------------------------------------
+    function traceTo(target, c) {
+      if (!c.valid || canvasWidth <= 0) return;
+      target = Math.min(target, c.rational ? traceStart + c.thetaClose : c.thetaMax);
+      if (target <= drawnTheta) return;
+
+      const g = geometry(c);
+      const step = angularStep(c, g);
+
+      lctx.save();
+      lctx.strokeStyle = palette.curve;
+      lctx.lineWidth = c.rational ? 2 : 1.1;
+      lctx.globalAlpha = c.rational ? 1 : 0.8;
+      lctx.lineJoin = "round";
+      lctx.lineCap = "round";
+      lctx.beginPath();
+
+      let start = toCanvas(pointAt(drawnTheta, c), g);
+      lctx.moveTo(start.x, start.y);
+      for (let t = drawnTheta + step; t < target; t += step) {
+        const pt = toCanvas(pointAt(t, c), g);
+        lctx.lineTo(pt.x, pt.y);
+      }
+      const end = toCanvas(pointAt(target, c), g);
+      lctx.lineTo(end.x, end.y);
+      lctx.stroke();
+      lctx.restore();
+
+      drawnTheta = target;
+    }
+
+    function clearLayer() {
+      lctx.setTransform(1, 0, 0, 1, 0, 0);
+      lctx.clearRect(0, 0, layer.width, layer.height);
+      lctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      drawnTheta = 0;
+    }
+
+    // Ridisegna da capo tutta la curva già percorsa (dopo un ridimensionamento)
+    function rebuildLayer() {
+      const c = getConfig();
+      layer.width = canvas.width;
+      layer.height = canvas.height;
+      clearLayer();
+      drawnTheta = traceStart;
+      traceTo(theta, c);
+    }
+
+    // ---------------------------------------------------------
+    // Disegno della scena
+    // ---------------------------------------------------------
+    function drawGrid() {
+      ctx.save();
+      ctx.strokeStyle = palette.grid;
+      ctx.lineWidth = 1;
+      const spacing = Math.max(36, Math.round(canvasWidth / 14));
+      ctx.beginPath();
+      for (let x = spacing; x < canvasWidth; x += spacing) {
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvasHeight);
+      }
+      for (let y = spacing; y < canvasHeight; y += spacing) {
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvasWidth, y);
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function circle(x, y, radius) {
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, TAU);
+    }
+
+    function draw() {
+      if (canvasWidth <= 0 || canvasHeight <= 0) return;
+      const c = getConfig();
+      const g = geometry(c);
+
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+      ctx.fillStyle = palette.background;
+      ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+      drawGrid();
+
+      // Cerchio fisso (raggio R = k)
+      ctx.save();
+      circle(g.cx, g.cy, c.k * g.scale);
+      ctx.fillStyle = palette.fixedFill;
+      ctx.fill();
+      ctx.strokeStyle = palette.fixed;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.restore();
+
+      // La curva già tracciata
+      ctx.drawImage(layer, 0, 0, canvasWidth, canvasHeight);
+
+      if (!c.valid) return;
+
+      const center = toCanvas(centerAt(theta, c), g);
+      const point = toCanvas(pointAt(theta, c), g);
+
+      // Cerchio mobile (raggio r = 1) e raggio che porta al punto
+      if (controls.circles.checked) {
+        ctx.save();
+        circle(center.x, center.y, g.scale);
+        ctx.fillStyle = palette.rollingFill;
+        ctx.fill();
+        ctx.strokeStyle = palette.rolling;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(center.x, center.y);
+        ctx.lineTo(point.x, point.y);
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.fillStyle = palette.rolling;
+        circle(center.x, center.y, 3);
+        ctx.fill();
+
+        ctx.fillStyle = palette.fixed;
+        circle(g.cx, g.cy, 3);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // Il punto che traccia la curva
+      ctx.save();
+      circle(point.x, point.y, 6);
+      ctx.fillStyle = palette.point;
+      ctx.fill();
+      ctx.strokeStyle = palette.background;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // ---------------------------------------------------------
+    // Letture nella barra e messaggi
+    // ---------------------------------------------------------
+    function cuspsSoFar(c) {
+      if (!c.valid) return 0;
+      if (c.rational && closed) return c.P;
+      const travelled = (c.rational ? theta : Math.min(theta, c.thetaMax)) - traceStart;
+      const n = Math.floor(c.k * travelled / TAU + 1e-9);
+      return c.rational ? Math.min(n, c.P) : n;
+    }
+
+    function updateReadouts() {
+      const c = getConfig();
+      kOutput.textContent = c.label;
+      turnsOutput.textContent = formatNumber((theta - traceStart) / TAU, 2);
+      cuspsOutput.textContent = String(cuspsSoFar(c));
+    }
+
+    function showMessage(text, persistent = false) {
+      clearTimeout(messageTimer);
+      messageBox.textContent = text;
+      messageBox.classList.remove("is-hidden");
+      if (!persistent) {
+        messageTimer = setTimeout(() => messageBox.classList.add("is-hidden"), 3500);
+      }
+    }
+
+    function hideMessage() {
+      clearTimeout(messageTimer);
+      messageBox.classList.add("is-hidden");
+    }
+
+    // Nome della curva, quando ne ha uno
+    function curveName(c) {
+      if (!c.rational) return null;
+      const key = `${c.type}-${c.P}/${c.Q}`;
+      const names = {
+        "epi-1/1": "Questa è la <strong>cardioide</strong>.",
+        "epi-2/1": "Questa è la <strong>nefroide</strong>.",
+        "hypo-2/1": "La curva degenera in un <strong>segmento</strong>: il punto va avanti e indietro lungo un diametro (coppia di al-Tusi). Le due “cuspidi” sono gli estremi.",
+        "hypo-3/1": "Questa è la <strong>deltoide</strong>.",
+        "hypo-4/1": "Questa è l’<strong>astroide</strong>.",
+        "hypo-5/2": "Ne esce una <strong>stella a cinque punte</strong>."
+      };
+      return names[key] || null;
+    }
+
+    // Spiegazione di che cosa succede con il k scelto
+    function updateBox() {
+      const c = getConfig();
+      let html;
+
+      boxK.classList.toggle("avviso", !c.valid);
+
+      if (!c.valid) {
+        html = `<p><strong>Per l’ipocicloide serve k &gt; 1.</strong> Il cerchio mobile rotola all’interno di quello fisso,
+          quindi deve essere più piccolo: scegli un numeratore maggiore del denominatore.</p>`;
+      } else if (!c.rational) {
+        const corona = c.type === "epi"
+          ? "tra il cerchio fisso e il raggio R + 2r"
+          : "tra il raggio |R − 2r| e il cerchio fisso";
+        html = `<p><strong>k = ${c.label} ≈ ${formatNumber(c.k, 5)} è irrazionale.</strong>
+          Nessun numero intero di giri fa compiere anche al cerchio mobile un numero intero di rotazioni:
+          il punto non ripassa mai dalla posizione iniziale.</p>
+          <p>La curva non si chiude e, giro dopo giro, riempie densamente la corona ${corona}.
+          Premi più volte «Disegna subito» per vederlo.</p>`;
+      } else {
+        const reduced = (c.p !== c.P || c.q !== c.Q)
+          ? ` (${c.p}/${c.q} si semplifica in ${c.label})`
+          : "";
+
+        if (c.Q === 1) {
+          html = `<p><strong>k = ${c.label} è un intero</strong>${reduced}.
+            Dopo un solo giro attorno al cerchio fisso il punto torna esattamente dove era partito:
+            la curva si chiude subito e ha ${c.P} ${plural(c.P, "cuspide", "cuspidi")},
+            una per ogni volta che il punto tocca il cerchio fisso.</p>`;
+        } else {
+          html = `<p><strong>k = ${c.label} è razionale ma non intero</strong>${reduced}.
+            Il punto torna alla posizione iniziale solo dopo ${c.Q} giri attorno al cerchio fisso:
+            in quel momento l’arco percorso, ${c.Q} circonferenze del cerchio fisso, equivale esattamente a
+            ${c.P} circonferenze del cerchio mobile.</p>
+            <p>La curva si chiude con ${c.P} ${plural(c.P, "cuspide", "cuspidi")}.</p>`;
+        }
+
+        const name = curveName(c);
+        if (name) html += `<p>${name}</p>`;
+      }
+
+      boxK.innerHTML = html;
+    }
+
+    // ---------------------------------------------------------
+    // Animazione
+    // ---------------------------------------------------------
+    function setRunningUi(isRunning) {
+      startPauseButton.textContent = isRunning ? "Pausa" : "Avvia";
+      startPauseButton.setAttribute("aria-pressed", String(isRunning));
+    }
+
+    function startSimulation() {
+      if (running) return;
+      const c = getConfig();
+      if (!c.valid) return;
+      // Se la curva irrazionale ha già raggiunto il limite, si riparte da capo
+      if (!c.rational && theta >= c.thetaMax) resetSimulation();
+      running = true;
+      lastTimestamp = null;
+      setRunningUi(true);
+      animationFrameId = requestAnimationFrame(animate);
+    }
+
+    function pauseSimulation() {
+      running = false;
+      lastTimestamp = null;
+      if (animationFrameId !== null) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+      }
+      setRunningUi(false);
+    }
+
+    function toggleSimulation() {
+      if (running) pauseSimulation();
+      else startSimulation();
+    }
+
+    // Avanza fino a newTheta, disegnando la curva e gestendo chiusura e limite
+    function advanceTo(newTheta, c) {
+      theta = newTheta;
+      const closeAt = traceStart + c.thetaClose;
+
+      if (c.rational) {
+        if (!closed && theta >= closeAt) {
+          traceTo(closeAt, c);
+          closed = true;
+          showMessage(`Curva chiusa dopo ${c.Q} ${plural(c.Q, "giro", "giri")}: ${c.P} ${plural(c.P, "cuspide", "cuspidi")}`);
+        } else {
+          traceTo(theta, c);
+        }
+      } else {
+        if (theta >= c.thetaMax) {
+          theta = c.thetaMax;
+          traceTo(theta, c);
+          pauseSimulation();
+          showMessage(`Dopo ${MAX_TURNS_IRR} giri la curva non si è chiusa. E non lo farà mai.`);
+        } else {
+          traceTo(theta, c);
+        }
+      }
+    }
+
+    function animate(timestamp) {
+      if (!running) return;
+      if (lastTimestamp === null) lastTimestamp = timestamp;
+      const elapsed = clamp((timestamp - lastTimestamp) / 1000, 0, 0.05);
+      lastTimestamp = timestamp;
+
+      const c = getConfig();
+      const speed = Number.parseFloat(controls.speed.value) || 1;
+      advanceTo(theta + BASE_SPEED * speed * elapsed, c);
+
+      updateReadouts();
+      draw();
+      if (running) animationFrameId = requestAnimationFrame(animate);
+    }
+
+    function resetSimulation({ keepRunning = false } = {}) {
+      const c = getConfig();
+      theta = 0;
+      traceStart = 0;
+      closed = false;
+      clearLayer();
+      hideMessage();
+      updateBox();
+      updateReadouts();
+
+      if (!c.valid) {
+        pauseSimulation();
+        showMessage("Per l’ipocicloide serve k > 1", true);
+      } else if (!keepRunning) {
+        pauseSimulation();
+      }
+      draw();
+    }
+
+    function drawAll() {
+      const c = getConfig();
+      if (!c.valid) return;
+      if (c.rational) {
+        advanceTo(Math.max(theta, traceStart + c.thetaClose), c);
+      } else {
+        const target = Math.min(theta + TURNS_PER_CLICK * TAU, c.thetaMax);
+        advanceTo(target, c);
+        if (target < c.thetaMax) {
+          showMessage(`${formatNumber((theta - traceStart) / TAU, 0)} giri, e ancora nessuna chiusura`);
+        }
+      }
+      updateReadouts();
+      draw();
+    }
+
+    // ---------------------------------------------------------
+    // Ridimensionamento del canvas
+    // ---------------------------------------------------------
+    function resizeCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvasWidth = Math.max(1, rect.width);
+      canvasHeight = Math.max(1, rect.height);
+      canvas.width = Math.round(canvasWidth * dpr);
+      canvas.height = Math.round(canvasHeight * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      rebuildLayer();
+      draw();
+    }
+
+    // ---------------------------------------------------------
+    // Controlli
+    // ---------------------------------------------------------
+    function setIrrational(key) {
+      irrationalKey = key;
+      irrButtons.forEach((button) => {
+        button.setAttribute("aria-pressed", String(button.dataset.irr === key));
+      });
+    }
+
+    function syncRangeAndNumber(range, number) {
+      const min = Number.parseInt(range.min, 10);
+      const max = Number.parseInt(range.max, 10);
+
+      range.addEventListener("input", () => {
+        number.value = range.value;
+        setIrrational(null);
+        resetSimulation({ keepRunning: running });
+      });
+
+      number.addEventListener("input", () => {
+        const raw = Number.parseInt(number.value, 10);
+        if (!Number.isFinite(raw) || raw < min || raw > max) return;
+        range.value = String(raw);
+        setIrrational(null);
+        resetSimulation({ keepRunning: running });
+      });
+
+      number.addEventListener("change", () => {
+        const raw = Number.parseInt(number.value, 10);
+        const value = clamp(Number.isFinite(raw) ? raw : Number.parseInt(range.value, 10), min, max);
+        number.value = String(value);
+        range.value = String(value);
+        setIrrational(null);
+        resetSimulation({ keepRunning: running });
+      });
+    }
+
+    function setPair(range, number, value) {
+      range.value = String(value);
+      number.value = String(value);
+    }
+
+    function applyPreset(name) {
+      const preset = PRESETS[name];
+      if (!preset) return;
+      document.querySelector(`input[name="tipo"][value="${preset.type}"]`).checked = true;
+      setPair(controls.pRange, controls.pNumber, preset.p);
+      setPair(controls.qRange, controls.qNumber, preset.q);
+      setIrrational(null);
+      resetSimulation();
+      startSimulation();
+    }
+
+    syncRangeAndNumber(controls.pRange, controls.pNumber);
+    syncRangeAndNumber(controls.qRange, controls.qNumber);
+
+    typeRadios.forEach((radio) => {
+      radio.addEventListener("change", () => resetSimulation({ keepRunning: running }));
+    });
+
+    irrButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        setIrrational(button.dataset.irr);
+        resetSimulation();
+        startSimulation();
+      });
+    });
+
+    presetButtons.forEach((button) => {
+      button.addEventListener("click", () => applyPreset(button.dataset.preset));
+    });
+
+    controls.speed.addEventListener("input", () => {
+      const value = Number.parseFloat(controls.speed.value) || 1;
+      const digits = Number.isInteger(value) ? 0 : (Number.isInteger(value * 2) ? 1 : 2);
+      controls.speedOutput.textContent = `${formatNumber(value, digits)}×`;
+    });
+
+    controls.circles.addEventListener("change", draw);
+
+    startPauseButton.addEventListener("click", toggleSimulation);
+    resetButton.addEventListener("click", () => resetSimulation());
+    drawAllButton.addEventListener("click", drawAll);
+    clearTraceButton.addEventListener("click", () => {
+      // Cancella la traccia ma lascia il cerchio dov'è: la curva riparte da qui
+      // (con k razionale la nuova traccia si chiuderà dopo altri q giri)
+      clearLayer();
+      traceStart = theta;
+      drawnTheta = theta;
+      closed = false;
+      hideMessage();
+      updateReadouts();
+      draw();
+    });
+
+    // Barra spaziatrice: avvia / mette in pausa
+    document.addEventListener("keydown", (event) => {
+      if (event.code !== "Space") return;
+      const target = event.target;
+      if (
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLButtonElement ||
+        target instanceof HTMLTextAreaElement ||
+        (target instanceof HTMLElement && target.closest("summary"))
+      ) return;
+      event.preventDefault();
+      toggleSimulation();
+    });
+
+    // Pannello dei parametri: sempre aperto su desktop, chiuso di default su smartphone
+    if (controlsPanel && "matchMedia" in window) {
+      const desktopQuery = window.matchMedia("(min-width: 901px)");
+      const syncPanel = () => { controlsPanel.open = desktopQuery.matches; };
+      syncPanel();
+      if (desktopQuery.addEventListener) desktopQuery.addEventListener("change", syncPanel);
+      else if (desktopQuery.addListener) desktopQuery.addListener(syncPanel);
+    }
+
+    if ("ResizeObserver" in window && frameElement) {
+      new ResizeObserver(resizeCanvas).observe(frameElement);
+    } else {
+      window.addEventListener("resize", resizeCanvas);
+    }
+
+    controls.speed.dispatchEvent(new Event("input"));
+    resetSimulation();
+    requestAnimationFrame(resizeCanvas);
+  })();
+  </script>
+</body>
+</html>
