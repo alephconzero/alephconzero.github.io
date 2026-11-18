@@ -129,7 +129,6 @@ const citazioni = [
   { testo: "L'uomo deve respirare incessantemente l'umiltà e il timor di Dio, come il soffio che inala ed espelle dalle narici.", autore: "Abate Pastor" },
   { testo: "Non darti importanza ma legati a colui che si comporta bene.", autore: "Abate Pastor" },
   { testo: "Riposati oggi, domani farai penitenza. — No, oggi farò penitenza e domani sia fatta la volontà di Dio.", autore: "Ignoto" },
-  { testo: "Un po' di filosofia inclina la mente dell'uomo all'ateismo; ma la profondità nella filosofia riconduce le menti degli uomini alla religione.", autore: "Francis Bacon, Saggi, «Dell'ateismo»" },
   { testo: "I cieli narrano la gloria di Dio, l'opera delle sue mani annuncia il firmamento.", autore: "Sal 19 (18)" },
   { testo: "Trovo in me stesso un desiderio che nessuna esperienza al mondo può soddisfare: la spiegazione più probabile è che sono stato fatto per un altro mondo.", autore: "C.S. Lewis" },
   { testo: "Non abbiamo quaggiù una città stabile, ma andiamo in cerca di quella futura.", autore: "Ebrei 13,14" },
