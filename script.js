@@ -28,19 +28,74 @@ if (hamburger && menu) {
     setMenuState(!menu.classList.contains("show"));
   });
 
-  // (extra non distruttivo) chiudi con ESC
+  // chiudi con ESC
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
       setMenuState(false);
     }
   });
 
-  // (extra non distruttivo) click fuori per chiudere
+  // click fuori per chiudere
   document.addEventListener("click", (e) => {
     if (!menu.classList.contains("show")) return;
     if (menu.contains(e.target) || hamburger.contains(e.target)) return;
     setMenuState(false);
   });
+}
+
+// ======================
+// DIALOGHI: avatar automatici
+// ======================
+// COME SI USA
+//  Nelle battute NON serve più scrivere <img ...>. Basta:
+//      <div class="battuta sinistra"><p>Testo</p></div>   → Aleph
+//      <div class="battuta destra"><p>Testo</p></div>     → Sgrunz
+//
+//  Per far parlare un altro personaggio:
+//      <div class="battuta destra" data-chi="nome"><p>Testo</p></div>
+//  e aggiungere "nome" nell'elenco PERSONAGGI qui sotto.
+//
+//  Le battute che hanno già la loro <img> (articoli vecchi) restano come sono:
+//  non c'è bisogno di modificarle.
+
+// Cartella principale del sito, ricavata dalla posizione di questo script:
+// funziona sia per le pagine nella cartella principale sia per quelle in /Articoli/.
+const RADICE_SITO = document.currentScript
+  ? new URL(".", document.currentScript.src).href
+  : "/";
+
+const PERSONAGGI = {
+  aleph:  { img: "immagini/Aleph.jpg", nome: "Aleph" },
+  sgrunz: { img: "immagini/Sigma.png", nome: "Sgrunz" },
+};
+
+const PERSONAGGIO_PREDEFINITO = { sinistra: "aleph", destra: "sgrunz" };
+
+function aggiungiAvatar() {
+  document.querySelectorAll(".battuta").forEach((battuta) => {
+    // se la battuta ha già il suo avatar, non si tocca
+    const primo = battuta.firstElementChild;
+    if (primo && primo.tagName === "IMG" && !primo.classList.contains("immagine-battuta")) return;
+
+    const lato = battuta.classList.contains("destra") ? "destra" : "sinistra";
+    const chi = (battuta.dataset.chi || PERSONAGGIO_PREDEFINITO[lato]).toLowerCase();
+    const personaggio = PERSONAGGI[chi];
+    if (!personaggio) {
+      console.warn('Dialogo: personaggio sconosciuto "' + chi + '"');
+      return;
+    }
+
+    const img = document.createElement("img");
+    img.src = RADICE_SITO + personaggio.img;
+    img.alt = personaggio.nome;
+    battuta.prepend(img);
+  });
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", aggiungiAvatar);
+} else {
+  aggiungiAvatar();
 }
 
 // ======================
@@ -63,6 +118,7 @@ function updateProgress() {
 updateProgress();
 window.addEventListener("scroll", updateProgress, { passive: true });
 window.addEventListener("resize", updateProgress);
+window.addEventListener("load", updateProgress);
 
 // ======================
 // CITAZIONE CASUALE CON FADE SOLO DEL TESTO
@@ -73,17 +129,25 @@ const citazioni = [
   { testo: "L'uomo deve respirare incessantemente l'umiltà e il timor di Dio, come il soffio che inala ed espelle dalle narici.", autore: "Abate Pastor" },
   { testo: "Non darti importanza ma legati a colui che si comporta bene.", autore: "Abate Pastor" },
   { testo: "Riposati oggi, domani farai penitenza. — No, oggi farò penitenza e domani sia fatta la volontà di Dio.", autore: "Ignoto" },
-  { testo: "Il primo sorso dal bicchiere delle scienze naturali rende atei; ma in fondo al bicchiere ci attende Dio.", autore: "W. K. Heisenberg" },
+  { testo: "Un po' di filosofia inclina la mente dell'uomo all'ateismo; ma la profondità nella filosofia riconduce le menti degli uomini alla religione.", autore: "Francis Bacon, Saggi, «Dell'ateismo»" },
   { testo: "I cieli narrano la gloria di Dio, l'opera delle sue mani annuncia il firmamento.", autore: "Sal 19 (18)" },
   { testo: "Trovo in me stesso un desiderio che nessuna esperienza al mondo può soddisfare: la spiegazione più probabile è che sono stato fatto per un altro mondo.", autore: "C.S. Lewis" },
   { testo: "Non abbiamo quaggiù una città stabile, ma andiamo in cerca di quella futura.", autore: "Ebrei 13,14" },
-  { testo: "Caro signore, benché a lungo alienato, l'uommo non è perduto né del tutto cambiato.", autore: "J.R.R. Tolkien" },
+  { testo: "Caro signore, benché a lungo alienato, l'uomo non è perduto né del tutto cambiato.", autore: "J.R.R. Tolkien" },
   { testo: "Nessuno di voi sia trovato disertore. Il vostro battesimo rimanga come uno scudo, la fede come un elmo, la carità come una lancia, la pazienza come un'armatura.", autore: "Sant'Ignazio di Antiochia" }
 ];
 
 let indiceCorrente = -1;
 const durataVisibile = 10000; // tempo di permanenza
 const durataFade = 1000;      // durata dissolvenza
+
+function scriviCitazione(contenuto, indice) {
+  const c = citazioni[indice];
+  contenuto.innerHTML = `
+    <p>“${c.testo}”</p>
+    <footer>— ${c.autore}</footer>
+  `;
+}
 
 function mostraCitazione() {
   const sezione = document.getElementById("citazione");
@@ -107,11 +171,7 @@ function mostraCitazione() {
     } while (nuovo === indiceCorrente && citazioni.length > 1);
     indiceCorrente = nuovo;
 
-    const citazione = citazioni[indiceCorrente];
-    contenuto.innerHTML = `
-      <p>“${citazione.testo}”</p>
-      <footer>— ${citazione.autore}</footer>
-    `;
+    scriviCitazione(contenuto, indiceCorrente);
 
     // fade in
     contenuto.classList.remove("fade-out");
@@ -123,16 +183,10 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!sezione) return;
 
   // Mostra immediatamente una citazione casuale
-  const iniziale = Math.floor(Math.random() * citazioni.length);
-  indiceCorrente = iniziale;
-  const citazione = citazioni[iniziale];
-
+  indiceCorrente = Math.floor(Math.random() * citazioni.length);
   const contenuto = document.createElement("div");
   contenuto.className = "testo-citazione"; // non ha fade all'inizio
-  contenuto.innerHTML = `
-    <p>“${citazione.testo}”</p>
-    <footer>— ${citazione.autore}</footer>
-  `;
+  scriviCitazione(contenuto, indiceCorrente);
   sezione.appendChild(contenuto);
 
   // Poi attiva il ciclo automatico
@@ -145,7 +199,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // COME SI USA
 //  1) Nel testo (in qualsiasi articolo):
 //       <span class="termine">sincretico</span>
-//  2) Qui sotto aggiungi la definizione, con la stessa parola in minuscolo.
+//  2) Qui sotto aggiungi la definizione. Maiuscole e minuscole non contano.
 //     La definizione si scrive una volta sola e vale per tutte le pagine.
 //
 // CASI PARTICOLARI
@@ -199,11 +253,19 @@ const GLOSSARIO = {
   "retrocarica": "Detto di un'arma da fuoco che si carica da dietro e non dalla bocca della canna, molto più rapida da ricaricare dei vecchi fucili.",
 };
 
- 
 document.addEventListener("DOMContentLoaded", () => {
   const termini = Array.from(document.querySelectorAll(".termine"));
   if (!termini.length) return;
- 
+
+  const normalizza = (s) => s.trim().toLowerCase().replace(/\s+/g, " ");
+
+  // Copia del glossario con le chiavi in minuscolo:
+  // così "Dei Filius" nel glossario trova "Dei Filius" nel testo.
+  const glossario = {};
+  Object.keys(GLOSSARIO).forEach((k) => {
+    glossario[normalizza(k)] = GLOSSARIO[k];
+  });
+
   // Un'unica tendina condivisa da tutti i termini della pagina
   const tendina = document.createElement("div");
   tendina.id = "tendina-glossario";
@@ -216,15 +278,14 @@ document.addEventListener("DOMContentLoaded", () => {
     '<strong class="tendina-titolo"></strong>' +
     '<div class="tendina-testo"></div>';
   document.body.appendChild(tendina);
- 
+
   const titolo = tendina.querySelector(".tendina-titolo");
   const testo = tendina.querySelector(".tendina-testo");
   const definizioni = new Map();
   let attivo = null;
- 
-  const chiaveDi = (el) =>
-    (el.dataset.termine || el.textContent).trim().toLowerCase().replace(/\s+/g, " ");
- 
+
+  const chiaveDi = (el) => normalizza(el.dataset.termine || el.textContent);
+
   function posiziona(el) {
     const margine = 12;
     const distanza = 10;
@@ -232,20 +293,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const larghezza = Math.min(340, vw - margine * 2);
     tendina.style.width = larghezza + "px";
     const altezza = tendina.offsetHeight;
- 
+
     // se la parola va a capo, usa la prima e l'ultima riga
     const righe = el.getClientRects();
     const prima = righe[0];
     const ultima = righe[righe.length - 1];
     const centro = (ultima.left + ultima.right) / 2;
- 
+
     const sinistra = Math.max(margine, Math.min(centro - larghezza / 2, vw - larghezza - margine));
- 
+
     const spazioSotto = window.innerHeight - ultima.bottom;
     const spazioSopra = prima.top;
     const sotto = spazioSotto >= altezza + distanza + margine || spazioSotto >= spazioSopra;
     const alto = sotto ? ultima.bottom + distanza : prima.top - altezza - distanza;
- 
+
     // la tendina e' dentro <body> (position: relative): si parte dall'origine del body
     const corpo = document.body.getBoundingClientRect();
     tendina.style.left = sinistra - corpo.left + "px";
@@ -256,7 +317,7 @@ document.addEventListener("DOMContentLoaded", () => {
       Math.max(22, Math.min(centro - sinistra - 4, larghezza - 22)) + "px"
     );
   }
- 
+
   function apri(el) {
     if (attivo && attivo !== el) attivo.setAttribute("aria-expanded", "false");
     attivo = el;
@@ -267,7 +328,7 @@ document.addEventListener("DOMContentLoaded", () => {
     tendina.setAttribute("aria-hidden", "false");
     el.setAttribute("aria-expanded", "true");
   }
- 
+
   function chiudi(riportaFocus) {
     if (!attivo) return;
     const el = attivo;
@@ -277,25 +338,25 @@ document.addEventListener("DOMContentLoaded", () => {
     tendina.setAttribute("aria-hidden", "true");
     if (riportaFocus) el.focus();
   }
- 
+
   function alterna(el) {
     if (attivo === el) chiudi(false);
     else apri(el);
   }
- 
+
   termini.forEach((el) => {
-    const definizione = el.dataset.def || GLOSSARIO[chiaveDi(el)];
+    const definizione = el.dataset.def || glossario[chiaveDi(el)];
     if (!definizione) {
       console.warn('Glossario: manca la definizione di "' + chiaveDi(el) + '"');
       return;
     }
     definizioni.set(el, definizione);
- 
+
     el.setAttribute("role", "button");
     el.setAttribute("tabindex", "0");
     el.setAttribute("aria-expanded", "false");
     el.setAttribute("aria-controls", "tendina-glossario");
- 
+
     el.addEventListener("click", () => alterna(el));
     el.addEventListener("keydown", (e) => {
       if (e.key !== "Enter" && e.key !== " ") return;
@@ -303,24 +364,25 @@ document.addEventListener("DOMContentLoaded", () => {
       alterna(el);
     });
   });
- 
+
   tendina.querySelector(".tendina-chiudi").addEventListener("click", () => chiudi(false));
- 
+
   // click fuori per chiudere
   document.addEventListener("click", (e) => {
     if (!attivo) return;
     if (tendina.contains(e.target) || attivo.contains(e.target)) return;
     chiudi(false);
   });
- 
+
   // ESC per chiudere (il focus torna sulla parola)
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") chiudi(true);
   });
- 
+
   // se la finestra cambia dimensione il testo va a capo altrove: riposiziona
   window.addEventListener("resize", () => {
     if (attivo) posiziona(attivo);
   });
 });
+
  
